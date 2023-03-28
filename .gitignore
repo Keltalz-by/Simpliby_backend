@@ -1,0 +1,7 @@
+.vscode/
+.husky/
+node_modules/
+dist/
+coverage/
+logs/
+.env.local
