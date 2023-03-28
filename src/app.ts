@@ -21,7 +21,7 @@ const credentials = config.get<boolean>('credentials');
 const port = config.get<number>('port');
 const nodeEnv = config.get<string>('nodeEnv');
 
-export default class App {
+export class App {
   public app: express.Application;
   public port: number;
   public nodeEnv: string;
