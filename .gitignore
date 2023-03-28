@@ -1,5 +1,6 @@
 .vscode/
 .husky/
+.eslintcache
 node_modules/
 dist/
 coverage/
