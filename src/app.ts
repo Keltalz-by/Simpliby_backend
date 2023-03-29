@@ -8,9 +8,10 @@ import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import { connect, set } from 'mongoose';
 import { type Routes } from '@src/common';
 import { ErrorHandler } from './middlewares';
-import { logger, stream } from './utils';
+import { db, logger, stream } from './utils';
 import { NODE_ENV, PORT, ORIGIN, CREDENTIALS } from './config';
 
 export class App {
@@ -27,6 +28,7 @@ export class App {
     this.initializeRoutes(routes);
     this.initializeSwagger();
     this.initializeErrorHandler();
+    this.connectToDatabase();
   }
 
   private initializeRoutes(routes: Routes[]) {
@@ -82,5 +84,14 @@ export class App {
 
   public runServer() {
     return this.app;
+  }
+
+  private connectToDatabase() {
+    if (this.env !== 'production') {
+      set('debug', true);
+    }
+
+    void connect(db);
+    logger.info('Connected to database');
   }
 }
