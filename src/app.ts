@@ -1,8 +1,7 @@
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import http from 'http';
 import helmet from 'helmet';
-import config from 'config';
 import morgan from 'morgan';
 import compression from 'compression';
 import hpp from 'hpp';
@@ -10,26 +9,19 @@ import cookieParser from 'cookie-parser';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { type Routes } from '@src/common';
-import { ErrorHandler } from '@src/middlewares';
-import { logger } from '@src/utils';
-
-const logFormat = config.get<string>('logFormat');
-
-const origin = config.get<string>('origin');
-const credentials = config.get<boolean>('credentials');
-
-const port = config.get<number>('port');
-const nodeEnv = config.get<string>('nodeEnv');
+import { ErrorHandler } from './middlewares';
+import { logger, stream } from './utils';
+import { NODE_ENV, PORT, ORIGIN, CREDENTIALS } from './config';
 
 export class App {
   public app: express.Application;
-  public port: number;
-  public nodeEnv: string;
+  public env: string;
+  public port: string | number;
 
   constructor(routes: Routes[]) {
     this.app = express();
-    this.port = port;
-    this.nodeEnv = nodeEnv;
+    this.port = PORT ?? 5000;
+    this.env = NODE_ENV ?? 'development';
 
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
@@ -37,21 +29,26 @@ export class App {
     this.initializeErrorHandler();
   }
 
+  private initializeRoutes(routes: Routes[]) {
+    routes.forEach((route) => {
+      this.app.use('/api/v1', route.router);
+
+      // undefined routes
+      this.app.use('*', (_req: Request, res: Response) => {
+        res.status(404).json({ status: 'fail', message: 'Route does not exist' });
+      });
+    });
+  }
+
   private initializeMiddlewares() {
-    this.app.use(morgan(logFormat));
-    this.app.use(cors({ origin, credentials }));
+    this.app.use(morgan('dev', { stream }));
+    this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
     this.app.use(helmet());
     this.app.use(hpp());
     this.app.use(compression());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
-  }
-
-  private initializeRoutes(routes: Routes[]) {
-    routes.forEach((route) => {
-      this.app.use('/api/v1', route.router);
-    });
   }
 
   private initializeSwagger() {
@@ -78,7 +75,7 @@ export class App {
   public listen() {
     const server = http.createServer(this.app);
     server.listen(this.port, () => {
-      logger.info(`==== ENV: ${this.nodeEnv} ====`);
+      logger.info(`==== ENV: ${this.env} ====`);
       logger.info(`App listening on port ${this.port}`);
     });
   }

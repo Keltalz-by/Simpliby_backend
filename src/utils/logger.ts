@@ -1,12 +1,11 @@
-import config from 'config';
+// import { LOG_DIR } from '../config'
 import winston from 'winston';
 import winstonDaily from 'winston-daily-rotate-file';
 import path from 'path';
 import * as fs from 'fs';
 
 // the logs directory
-const logDirEnv = config.get<string>('logDir');
-const logDir = path.join(__dirname, logDirEnv);
+const logDir: string = path.join(__dirname, '../logs');
 
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);

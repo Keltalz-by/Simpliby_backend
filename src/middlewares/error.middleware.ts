@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from 'express';
-import { logger, type AppError } from '@src/utils';
+import { logger, type AppError } from '../utils';
 
 export const ErrorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
   try {

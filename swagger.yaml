@@ -1,0 +1,9 @@
+tags:
+- name: users
+  description: users API
+
+paths:
+  /users:
+    get:
+      tags:
+      - users
