@@ -1,4 +1,4 @@
-import express, { type Request, type Response } from 'express';
+import express from 'express';
 import cors from 'cors';
 import http from 'http';
 import helmet from 'helmet';
@@ -34,44 +34,7 @@ export class App {
   private initializeRoutes(routes: Routes[]) {
     routes.forEach((route) => {
       this.app.use('/api/v1', route.router);
-
-      // undefined routes
-      this.app.use('*', (_req: Request, res: Response) => {
-        res.status(404).json({ status: 'fail', message: 'Route does not exist' });
-      });
     });
-  }
-
-  private initializeMiddlewares() {
-    this.app.use(morgan('dev', { stream }));
-    this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
-    this.app.use(helmet());
-    this.app.use(hpp());
-    this.app.use(compression());
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(cookieParser());
-  }
-
-  private initializeSwagger() {
-    const options: swaggerJSDoc.Options = {
-      definition: {
-        openapi: '3.0.0',
-        info: {
-          title: 'Simplibuy REST API',
-          version: '1.0.0',
-          description: 'This documentation describes the endpoints for Simplibuy ecommerce app.',
-        },
-      },
-      apis: ['swagger.yaml'],
-    };
-
-    const specs = swaggerJSDoc(options);
-    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-  }
-
-  private initializeErrorHandler() {
-    this.app.use(ErrorHandler);
   }
 
   public listen() {
@@ -93,5 +56,37 @@ export class App {
 
     void connect(db);
     logger.info('Connected to database');
+  }
+
+  private initializeMiddlewares() {
+    this.app.use(morgan('dev', { stream }));
+    this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
+    this.app.use(helmet());
+    this.app.use(hpp());
+    this.app.use(compression());
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(cookieParser());
+  }
+
+  private initializeSwagger() {
+    const options: swaggerJSDoc.Options = {
+      definition: {
+        openapi: '3.0.0',
+        info: {
+          title: 'Simplibuy REST API',
+          version: '1.0.0',
+          description: 'This documentation describes the endpoints for Simplibuy ecommerce app.'
+        }
+      },
+      apis: ['swagger.yaml']
+    };
+
+    const specs = swaggerJSDoc(options);
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+  }
+
+  private initializeErrorHandler() {
+    this.app.use(ErrorHandler);
   }
 }

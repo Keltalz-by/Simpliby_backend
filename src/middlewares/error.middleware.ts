@@ -7,7 +7,7 @@ export const ErrorHandler = (err: AppError, req: Request, res: Response, next: N
     const message: string = err.message ?? 'Something went wrong';
 
     logger.error(`[${req.method}] ${req.path} >> StatusCode:: ${status}, Message:: ${message}`);
-    res.status(status).json({ message });
+    res.status(status).json({ message, success: false });
   } catch (err) {
     next(err);
   }

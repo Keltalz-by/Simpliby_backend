@@ -1,7 +1,8 @@
-import { AppError } from '@src/utils';
-import { type DocumentType, modelOptions, prop, Severity, pre, getModelForClass } from '@typegoose/typegoose';
+import { AppError } from '../../utils';
+import { type DocumentType, modelOptions, index, prop, Severity, pre, getModelForClass } from '@typegoose/typegoose';
 import argons2 from 'argon2';
 
+export const privateFields = ['password', '__v'];
 @pre<User>('save', async function () {
   if (!this.isModified('password')) {
     return;
@@ -10,14 +11,15 @@ import argons2 from 'argon2';
   const hash = await argons2.hash(this.password);
   this.password = hash;
 })
+@index({ email: 1 })
 @modelOptions({
   schemaOptions: {
     collection: 'users',
-    timestamps: true,
+    timestamps: true
   },
   options: {
-    allowMixed: Severity.ALLOW,
-  },
+    allowMixed: Severity.ALLOW
+  }
 })
 export class User {
   @prop({ required: true })
@@ -28,6 +30,15 @@ export class User {
 
   @prop({ required: true })
   public password: string;
+
+  @prop({ default: false })
+  public verified: boolean;
+
+  @prop({ default: null })
+  public resetPasswordToken: string | null;
+
+  @prop()
+  public resetPasswordTokenExpiration: Date;
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {
     try {
