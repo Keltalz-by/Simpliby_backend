@@ -2,7 +2,12 @@ import { AppError } from '../../utils';
 import { type DocumentType, modelOptions, index, prop, Severity, pre, getModelForClass } from '@typegoose/typegoose';
 import argons2 from 'argon2';
 
-export const privateFields = ['password', '__v'];
+export const privateFields = ['password', '__v', 'resetPasswordToken', 'resetPasswordTokenExpiration'];
+
+export enum Types {
+  STORE = 'STORE',
+  BUYER = 'BUYER'
+}
 @pre<User>('save', async function () {
   if (!this.isModified('password')) {
     return;
@@ -39,6 +44,12 @@ export class User {
 
   @prop()
   public resetPasswordTokenExpiration: Date;
+
+  @prop()
+  public phone: string;
+
+  @prop()
+  public location: string;
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {
     try {

@@ -2,13 +2,13 @@
 import { Router } from 'express';
 import { type Routes } from '@src/common';
 import { deserializeUser, requireUser, restrictUser, validateResource } from '../../middlewares';
-import { ProductController } from './product.controller';
-import { createProductSchema } from './product.schema';
+import { CategoryController } from './category.controller';
+import { createCategorySchema } from './category.schema';
 
-export class ProductRoute implements Routes {
-  public path = '/products/';
+export class CategoryRoute implements Routes {
+  public path = '/category/';
   public router = Router();
-  public product = new ProductController();
+  public category = new CategoryController();
 
   constructor() {
     this.initializeRoutes();
@@ -16,6 +16,6 @@ export class ProductRoute implements Routes {
 
   private initializeRoutes() {
     this.router.use(deserializeUser, requireUser, restrictUser('STORE'));
-    this.router.post(`${this.path}`, validateResource(createProductSchema), this.product.createProduct);
+    this.router.post(`${this.path}create`, validateResource(createCategorySchema), this.category.createCategory);
   }
 }

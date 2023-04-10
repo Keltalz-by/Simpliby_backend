@@ -13,6 +13,17 @@ export class UserService {
     return await UserModel.findOne(option);
   }
 
+  public async findAllUsers() {
+    return await UserModel.find({}).orFail().exec();
+  }
+
+  public async findAllBuyers() {
+    const buyers = await UserModel.find({ __t: { $ne: 'STORE' } })
+      .orFail()
+      .exec();
+    return buyers;
+  }
+
   public async verifyUser(userId: string) {
     return await UserModel.updateOne(
       { _id: userId },

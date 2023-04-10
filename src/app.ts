@@ -8,10 +8,10 @@ import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { connect, set } from 'mongoose';
+import { set } from 'mongoose';
 import { type Routes } from '@src/common';
 import { ErrorHandler } from './middlewares';
-import { db, logger, stream } from './utils';
+import { connectDB, logger, stream } from './utils';
 import { NODE_ENV, PORT, ORIGIN, CREDENTIALS } from './config';
 
 export class App {
@@ -24,17 +24,11 @@ export class App {
     this.port = PORT ?? 5000;
     this.env = NODE_ENV ?? 'development';
 
+    this.connectToDatabase();
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
     this.initializeErrorHandler();
-    this.connectToDatabase();
-  }
-
-  private initializeRoutes(routes: Routes[]) {
-    routes.forEach((route) => {
-      this.app.use('/api/v1', route.router);
-    });
   }
 
   public listen() {
@@ -54,8 +48,7 @@ export class App {
       set('debug', true);
     }
 
-    void connect(db);
-    logger.info('Connected to database');
+    void connectDB();
   }
 
   private initializeMiddlewares() {
@@ -67,6 +60,12 @@ export class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
+  }
+
+  private initializeRoutes(routes: Routes[]) {
+    routes.forEach((route) => {
+      this.app.use('/api/v1', route.router);
+    });
   }
 
   private initializeSwagger() {
