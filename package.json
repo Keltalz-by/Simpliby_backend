@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p",
     "start:dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "start": "npm run build && cross-env NODE_ENV=production node dist/server.js",
     "test": "jest",
