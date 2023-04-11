@@ -14,6 +14,5 @@ export class UserRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}`, this.user.getAllUsers);
-    this.router.get(`${this.path}buyers`, this.user.getAllBuyers);
   }
 }

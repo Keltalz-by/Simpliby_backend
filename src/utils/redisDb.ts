@@ -1,7 +1,10 @@
 import { createClient } from 'redis';
 import { logger } from './logger';
+import { REDIS_URL } from '../config';
 
-const redisClient = createClient();
+const redisClient = createClient({
+  url: REDIS_URL
+});
 
 const connectRedis = async () => {
   try {
