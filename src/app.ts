@@ -12,7 +12,7 @@ import { set } from 'mongoose';
 import { type Routes } from '@src/common';
 import { ErrorHandler } from './middlewares';
 import { connectDB, logger, stream } from './utils';
-import { NODE_ENV, PORT, ORIGIN, CREDENTIALS } from './config';
+import { NODE_ENV, PORT, ORIGIN, CREDENTIALS, SERVER_URL } from './config';
 
 export class App {
   public app: express.Application;
@@ -79,7 +79,7 @@ export class App {
         },
         servers: [
           {
-            url: 'http://localhost:5000/api/v1'
+            url: SERVER_URL
           }
         ]
       },
