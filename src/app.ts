@@ -76,7 +76,12 @@ export class App {
           title: 'Simplibuy REST API',
           version: '1.0.0',
           description: 'This documentation describes the endpoints for Simplibuy ecommerce app.'
-        }
+        },
+        servers: [
+          {
+            url: 'http://localhost:5000/api/v1'
+          }
+        ]
       },
       apis: ['swagger.yaml']
     };

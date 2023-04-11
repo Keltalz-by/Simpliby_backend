@@ -5,7 +5,6 @@ import { AuthRoute } from './api/auth/auth.route';
 import { StoreRoute } from './api/store/store.route';
 import { CategoryRoute } from './api/category/category.route';
 import { ProductRoute } from './api/product/product.route';
-import { BuyerRoute } from './api/buyer/buyer.route';
 require('dotenv').config();
 
 ValidateEnv();
@@ -15,8 +14,7 @@ const authRoute = new AuthRoute();
 const storeRoute = new StoreRoute();
 const categoryRoute = new CategoryRoute();
 const productRoute = new ProductRoute();
-const buyerRoute = new BuyerRoute();
 
-const app = new App([buyerRoute, storeRoute, authRoute, userRoute, categoryRoute, productRoute]);
+const app = new App([authRoute, storeRoute, userRoute, categoryRoute, productRoute]);
 
 app.listen();
