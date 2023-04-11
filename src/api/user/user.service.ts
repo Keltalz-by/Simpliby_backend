@@ -17,18 +17,11 @@ export class UserService {
     return await UserModel.find({}).orFail().exec();
   }
 
-  public async findAllBuyers() {
-    const buyers = await UserModel.find({ __t: { $ne: 'STORE' } })
-      .orFail()
-      .exec();
-    return buyers;
-  }
-
-  public async verifyUser(userId: string) {
+  public async updateUser(userId: string, options: object) {
     return await UserModel.updateOne(
       { _id: userId },
       {
-        $set: { verified: true }
+        $set: options
       }
     );
   }

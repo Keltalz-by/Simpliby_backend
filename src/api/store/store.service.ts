@@ -2,7 +2,7 @@ import StoreModel, { type Store } from '../store/store.model';
 
 export class StoreService {
   public async createStore(storeData: Partial<Store>) {
-    return await StoreModel.create(storeData);
+    return await (await StoreModel.create(storeData)).populate('owner', 'name');
   }
 
   public async updateStore(storeId: string, options: object) {

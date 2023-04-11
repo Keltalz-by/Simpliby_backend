@@ -1,6 +1,4 @@
-import type IUser from '../user/user.interface';
-
-export default interface IStore extends IUser {
+export default interface IStore {
   name: string;
   email: string;
   password: string;

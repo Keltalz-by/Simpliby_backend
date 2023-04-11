@@ -1,31 +1,34 @@
-import { getDiscriminatorModelForClass, prop } from '@typegoose/typegoose';
-import UserModel, { User, Types } from '../user/user.model';
+import { Ref, getModelForClass, prop } from '@typegoose/typegoose';
+import { User } from '../user/user.model';
 
-export class Store extends User {
-  @prop()
-  public fullName: string;
+export class Store {
+  @prop({ ref: () => User })
+  public owner: Ref<User>;
 
   @prop()
   public businessName: string;
 
   @prop()
+  public location: string;
+
+  @prop()
   public description: string;
 
   @prop()
-  public storeAddress: string;
+  public address: string;
 
   @prop()
-  public storeCity: string;
+  public city: string;
 
   @prop()
   public country: string;
 
-  @prop()
-  public images: string[];
+  // @prop()
+  // public images: string[];
 
-  @prop()
-  public logo: string;
+  // @prop()
+  // public logo: string;
 }
 
-const StoreModel = getDiscriminatorModelForClass(UserModel, Store, Types.STORE);
+const StoreModel = getModelForClass(Store);
 export default StoreModel;

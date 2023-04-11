@@ -3,33 +3,59 @@ import { object, string, type TypeOf } from 'zod';
 export const registerSchema = object({
   body: object({
     name: string({
-      required_error: 'Name is required',
+      required_error: 'Name is required'
     }).min(4, 'Name length is too short'),
     email: string({
-      required_error: 'Email is required',
+      required_error: 'Email is required'
     }).email('Invalid email format'),
     password: string({
-      required_error: 'Password is required',
-    }).min(6, 'Password length is too short'),
+      required_error: 'Password is required'
+    }).min(6, 'Password length must be at least 6 characters'),
     passwordConfirm: string({
-      required_error: 'Password confirm is required',
-    }),
+      required_error: 'Password confirm is required'
+    })
   }).refine((data) => data.password === data.passwordConfirm, {
     path: ['passwordConfirm'],
-    message: 'Passwords are not the same',
-  }),
+    message: 'Passwords are not the same'
+  })
 });
 
 export const loginSchema = object({
   body: object({
     email: string({
-      required_error: 'Email is required',
+      required_error: 'Email is required'
     }).email('Invalid email or password'),
     password: string({
-      required_error: 'Password is required',
+      required_error: 'Password is required'
+    })
+  })
+});
+
+export const forgotPasswordSchema = object({
+  body: object({
+    email: string({
+      required_error: 'Email is required'
+    }).email('Invalid email')
+  })
+});
+
+export const resetPasswordSchema = object({
+  body: object({
+    userId: string({
+      required_error: 'User ID is required'
     }),
+    password: string({
+      required_error: 'Password is required'
+    }).min(6, 'Password length must be at least 6 characters')
   }),
+  params: object({
+    token: string({
+      required_error: 'token is required'
+    })
+  })
 });
 
 export type RegisterInput = TypeOf<typeof registerSchema>['body'];
 export type LoginInput = TypeOf<typeof loginSchema>['body'];
+export type ForgotPasswordInput = TypeOf<typeof forgotPasswordSchema>['body'];
+export type ResetPasswordInput = TypeOf<typeof resetPasswordSchema>['params'];

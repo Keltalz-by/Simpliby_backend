@@ -1,74 +1,72 @@
 import { type Request, type Response, type NextFunction, type CookieOptions } from 'express';
-// import { omit } from 'lodash';
-import { AppError, logger, otpGenerator, redisClient, sendOtpVerificationMail, signJwt, verifyJwt } from '../../utils';
-// import { privateFields } from '../user/user.model';
+import { omit } from 'lodash';
+import { AppError, redisClient, sendMail, signJwt, verifyJwt, requestPasswordTemplate } from '../../utils';
+import { privateFields } from '../user/user.model';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { OTPService } from '../otp/otp.service';
 import { type ResendOTPInput, type OtpInput } from '../otp/otp.schema';
-import { ACCESS_TOKEN_PRIVATE_KEY, REFRESH_TOKEN_PUBLIC_KEY, ACCESS_TOKEN_EXPIRESIN } from '../../config';
-import { type RegisterInput } from './auth.schema';
-
-const authService = new AuthService();
-const userService = new UserService();
-const otpService = new OTPService();
+import { ACCESS_TOKEN_PRIVATE_KEY, REFRESH_TOKEN_PUBLIC_KEY, ACCESS_TOKEN_EXPIRESIN, NODE_ENV } from '../../config';
+import { type RegisterInput, type LoginInput, type ForgotPasswordInput, type ResetPasswordInput } from './auth.schema';
+import type IUser from '../user/user.interface';
 
 const accessTokenCookieOptions: CookieOptions = {
   maxAge: 900000, // 15mins
   httpOnly: true,
   domain: 'localhost',
   path: '/',
-  secure: process.env.NODE_ENV === 'production'
+  secure: NODE_ENV === 'production'
+};
+
+const refreshTokenCookieOptions: CookieOptions = {
+  maxAge: 3.154e10, // 1 year
+  httpOnly: true,
+  domain: 'localhost',
+  path: '/',
+  secure: NODE_ENV === 'production'
 };
 
 const logout = (res: Response) => {
-  res.cookie('access_token', '', { maxAge: 1 });
-  res.cookie('refresh_token', '', { maxAge: 1 });
-  res.cookie('logged_in', '', { maxAge: 1 });
+  res.cookie('accessToken', '', { maxAge: 1 });
+  res.cookie('refreshToken', '', { maxAge: 1 });
+  res.cookie('loggedIn', '', { maxAge: 1 });
 };
 
 export class AuthController {
-  /* This is a function that is called when a user signs up. 
-        It creates a new user and sends an email to the user with 
-        a verification code.
-    */
-  public loginUser = async (req: Request, res: Response, next: NextFunction) => {
-    const message = 'Invalid email or password';
+  public authService = new AuthService();
+  public userService = new UserService();
+  public otpService = new OTPService();
 
-    const { email, password } = req.body;
+  public registerUser = async (req: Request<RegisterInput>, res: Response, next: NextFunction) => {
+    try {
+      const userData: IUser = req.body;
+      const newUser = await this.authService.signup(userData);
 
-    const user = await userService.findUser({ email });
-
-    if (user == null) {
-      next(new AppError(400, message));
-      return;
+      return res
+        .status(201)
+        .json({
+          success: true,
+          message: 'Check your email for verification code',
+          data: omit(newUser.toJSON(), privateFields)
+        });
+    } catch (error: any) {
+      next(error);
     }
+  };
 
-    const isValidPassword = await user.validatePassword(password);
+  public loginUser = async (req: Request<LoginInput>, res: Response, next: NextFunction) => {
+    try {
+      const userData: IUser = req.body;
 
-    if (!isValidPassword) {
-      next(new AppError(400, message));
+      const { accessToken, refreshToken } = await this.authService.login(userData);
+
+      res.cookie('accessToken', accessToken, accessTokenCookieOptions);
+      res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions);
+      res.cookie('loggedIn', true, accessTokenCookieOptions);
+      res.status(200).json({ success: true, data: { accessToken } });
+    } catch (error: any) {
+      next(error);
     }
-
-    if (!user.verified) {
-      next(new AppError(400, 'Please verify your email'));
-      return;
-    }
-
-    const { accessToken, refreshToken } = await authService.signToken(user);
-
-    const refreshTokenCookieOptions: CookieOptions = {
-      maxAge: 3.154e10, // 1 year
-      httpOnly: true,
-      domain: req.hostname,
-      path: '/',
-      secure: process.env.NODE_ENV === 'production'
-    };
-
-    res.cookie('accessToken', accessToken, accessTokenCookieOptions);
-    res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions);
-    res.cookie('loggedIn', true, accessTokenCookieOptions);
-    res.status(200).json({ success: true, data: { accessToken } });
   };
 
   public logoutUser = async (_req: Request, res: Response, next: NextFunction) => {
@@ -80,6 +78,18 @@ export class AuthController {
 
       return res.sendStatus(204);
     } catch (err: any) {
+      next(err);
+    }
+  };
+
+  public verifyEmail = async (req: Request<OtpInput>, res: Response, next: NextFunction) => {
+    try {
+      const { userId, otp } = req.body;
+
+      await this.authService.verifyEmail(userId, otp);
+
+      return res.status(200).json({ success: true, message: 'User verified successfully' });
+    } catch (err) {
       next(err);
     }
   };
@@ -102,7 +112,7 @@ export class AuthController {
         return;
       }
 
-      const user = await userService.findUser({ _id: JSON.parse(session)._id });
+      const user = await this.userService.findUser({ _id: JSON.parse(session)._id });
 
       if (user == null) {
         next(new AppError(404, 'User does not exist'));
@@ -122,96 +132,45 @@ export class AuthController {
     }
   };
 
-  public verifyEmail = async (req: Request<OtpInput>, res: Response, next: NextFunction) => {
-    try {
-      const { userId, otp } = req.body;
-
-      const otpRecord = await otpService.findOTP(userId);
-
-      if (otpRecord == null) {
-        next(new AppError(404, 'User does not exists or has been verified or OTP has expired'));
-        return;
-      }
-
-      const { createdAt, expiresAt } = otpRecord;
-
-      if (expiresAt < createdAt) {
-        await otpService.deleteOTP(userId);
-        next(new AppError(400, 'OTP expired. Resend OTP.'));
-        return;
-      }
-
-      const isOtpValid = await otpRecord.validateOTP(otp);
-
-      if (!isOtpValid) {
-        next(new AppError(400, 'Invalid OTP.'));
-        return;
-      }
-
-      await userService.verifyUser(userId);
-      await otpService.deleteOTP(userId);
-
-      return res.status(200).json({ success: true, message: 'User verified successfully' });
-    } catch (err) {
-      next(err);
-    }
-  };
-
   public resendOtp = async (req: Request<ResendOTPInput>, res: Response, next: NextFunction) => {
     try {
       const { userId, email } = req.body;
 
-      const user = await userService.findUser({ email });
+      await this.authService.resendOtp(userId, email);
 
-      if (user !== null) {
-        await otpService.deleteOTP(userId);
-
-        const newOtp = otpGenerator(4, {
-          digits: true,
-          lowerCaseAlphabets: true,
-          upperCaseAlphabets: true,
-          specialChars: false
-        });
-        const otp = await otpService.createOTP(userId, newOtp);
-
-        logger.info(otp);
-
-        await sendOtpVerificationMail(user.name, user.email, newOtp);
-
-        return res.status(201).json({ success: true, message: 'OTP resent successfully' });
-      }
-      return res.status(404).json({ success: false, message: 'User does not exist' });
-    } catch (err) {
-      next(err);
-    }
-  };
-
-  public signin = async (req: Request<RegisterInput>, res: Response, next: NextFunction) => {
-    try {
-      const userData = req.body;
-      const newOtp = otpGenerator(4, {
-        digits: true,
-        lowerCaseAlphabets: true,
-        upperCaseAlphabets: true,
-        specialChars: false
-      });
-
-      const user = await authService.signup(userData);
-      const otp = await otpService.createOTP(user._id, newOtp);
-
-      await sendOtpVerificationMail(user.name, user.email, newOtp);
-
-      logger.info(otp);
-
-      return res.status(201).json({ data: user });
+      return res
+        .status(200)
+        .json({ success: true, message: 'OTP resent successfully. Check your email for the new OTP.' });
     } catch (err: any) {
-      if (err.code === 11000) {
-        next(new AppError(409, 'Store with email already exist'));
-        return;
-      }
-
       next(err);
     }
   };
-  // `${req.protocol}://${req.get("host")}`
+
+  public forgotPassword = async (req: Request<ForgotPasswordInput>, res: Response, next: NextFunction) => {
+    try {
+      const { email } = req.body;
+      const { user, newToken } = await this.authService.requestPasswordReset(email);
+
+      // const link = `${req.protocol}://${req.hostname}${req.baseUrl}/auth/resetpassword/${newToken}`
+      const message = requestPasswordTemplate(user.name, newToken);
+
+      await sendMail(email, 'Request for Password Reset', message);
+      return res.status(200).json({ success: true, message: 'Check your email for reset link', resetToken: newToken });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  public resetPassword = async (req: Request<ResetPasswordInput>, res: Response, next: NextFunction) => {
+    try {
+      const { token } = req.params;
+      const { userId, password } = req.body;
+
+      await this.authService.resetPassword(userId, password, token);
+
+      return res.status(200).json({ success: true, message: 'Password reset successful' });
+    } catch (error: any) {
+      next(error);
+    }
+  };
 }

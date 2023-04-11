@@ -1,52 +1,31 @@
 import { type Request, type Response, type NextFunction } from 'express';
-import { AppError, logger, otpGenerator, sendOtpVerificationMail } from '../../utils';
+import { AppError, logger } from '../../utils';
 import { StoreService } from './store.service';
-import { OTPService } from '../otp/otp.service';
-import type mongoose from 'mongoose';
-import { type KeyStringAny, type DocumentType } from '@typegoose/typegoose/lib/types';
-import { type User, Types } from '../user/user.model';
-import { type Store } from './store.model';
-import { type StoreRegisterInput } from './store.schema';
-
-const storeService = new StoreService();
-const otpService = new OTPService();
-
-function checkForClass<T extends User>(doc: mongoose.Document & KeyStringAny, name: string): doc is DocumentType<T> {
-  return doc?.__t === name;
-}
+import { UserService } from '../user/user.service';
+// import { type Store } from './store.model';
+import { type CreateStoreInput } from './store.schema';
 
 export class StoreController {
-  public createStore = async (req: Request<{}, {}, StoreRegisterInput>, res: Response, next: NextFunction) => {
+  public storeService = new StoreService();
+  public userService = new UserService();
+
+  public createStore = async (req: Request<{}, {}, CreateStoreInput>, res: Response, next: NextFunction) => {
     try {
+      const userId = res.locals.user._id;
       const storeData = req.body;
-      const newOtp = otpGenerator(4, {
-        digits: true,
-        lowerCaseAlphabets: true,
-        upperCaseAlphabets: true,
-        specialChars: false
-      });
 
-      const store = await storeService.createStore(storeData);
-      const otp = await otpService.createOTP(store._id, newOtp);
+      const store = await this.storeService.createStore({ ...storeData, owner: userId });
+      await this.userService.updateUser(userId, { role: 'seller' });
 
-      await sendOtpVerificationMail(store.businessName, store.email, newOtp);
-
-      logger.info(otp);
-
-      return res.status(201).json({ data: store });
+      return res.status(201).json({ success: true, data: store });
     } catch (err: any) {
-      if (err.code === 11000) {
-        next(new AppError(409, 'User with email already exist'));
-        return;
-      }
-
       next(err);
     }
   };
 
   public findAllStores = async (_req: Request, res: Response, next: NextFunction) => {
     try {
-      const stores = await storeService.findAllStores();
+      const stores = await this.storeService.findAllStores();
       return res.status(200).json({ success: true, data: stores });
     } catch (err: any) {
       next(err);
@@ -58,13 +37,13 @@ export class StoreController {
       const storeId = req.params.storeId;
       const update = req.body;
 
-      const store = await storeService.findStoreById(storeId);
+      const store = await this.storeService.findStoreById(storeId);
 
       if (store === null) {
         next(new AppError(404, 'Store not found'));
       }
 
-      const updatedStore = await storeService.updateStore(storeId, update);
+      const updatedStore = await this.storeService.updateStore(storeId, update);
 
       logger.info(updatedStore);
 
@@ -83,15 +62,10 @@ export class StoreController {
     try {
       const storeId = req.params.storeId;
 
-      const store = await storeService.findStoreById(storeId);
+      const store = await this.storeService.findStoreById(storeId);
 
       if (store === null) {
         next(new AppError(404, 'Store not found'));
-      }
-
-      if (checkForClass<Store>(store, Types.STORE)) {
-        console.log(store);
-        return res.status(200).json({ success: true, data: store });
       }
     } catch (err: any) {
       next(err);

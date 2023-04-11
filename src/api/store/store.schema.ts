@@ -1,38 +1,31 @@
 import { object, string, type TypeOf } from 'zod';
 
-export const storeRegisterSchema = object({
+export const createStoreSchema = object({
   body: object({
+    owner: string({
+      required_error: 'Owner id is required'
+    }),
     businessName: string({
       required_error: 'Business Name is required'
     }),
     location: string({
       required_error: 'Location is required'
     }),
-    email: string({
-      required_error: 'Email is required'
-    }).email('Invalid email format'),
-    password: string({
-      required_error: 'Password is required'
-    }).min(6, 'Password length is too short'),
-    passwordConfirm: string({
-      required_error: 'Password confirm is required'
+    description: string({
+      required_error: 'Location is required'
+    }),
+    address: string({
+      required_error: 'Address is required'
+    }),
+    city: string({
+      required_error: 'City is required'
+    }),
+    country: string({
+      required_error: 'Country is required'
     })
-  }).refine((data) => data.password === data.passwordConfirm, {
-    path: ['passwordConfirm'],
-    message: 'Passwords are not the same'
+    // images: string({}),
+    // logo: string({}),
   })
 });
 
-export const storeLoginSchema = object({
-  body: object({
-    email: string({
-      required_error: 'Email is required'
-    }).email('Invalid email or password'),
-    password: string({
-      required_error: 'Password is required'
-    })
-  })
-});
-
-export type StoreRegisterInput = TypeOf<typeof storeRegisterSchema>['body'];
-export type StoreLoginInput = TypeOf<typeof storeLoginSchema>['body'];
+export type CreateStoreInput = TypeOf<typeof createStoreSchema>['body'];
