@@ -13,11 +13,15 @@ export class UserService {
     return await UserModel.findOne(option);
   }
 
-  public async verifyUser(userId: string) {
+  public async findAllUsers() {
+    return await UserModel.find({}).orFail().exec();
+  }
+
+  public async updateUser(userId: string, options: object) {
     return await UserModel.updateOne(
       { _id: userId },
       {
-        $set: { verified: true }
+        $set: options
       }
     );
   }

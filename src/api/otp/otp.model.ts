@@ -26,11 +26,8 @@ export class OTP {
   @prop({ required: true })
   public code: string;
 
-  @prop()
+  @prop({ default: Date.now(), expires: 5 * 60 * 1000 })
   public createdAt: Date;
-
-  @prop()
-  public expiresAt: Date;
 
   async validateOTP(this: DocumentType<OTP>, code: string) {
     try {

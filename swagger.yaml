@@ -1,9 +1,225 @@
 tags:
-- name: users
-  description: users API
+  - name: Auth
+    description: Everything about authentication
+  - name: Store
+    description: Everything about creating and owning a store
 
 paths:
-  /users:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register as a new user
+      description: Register as a new user
+      operationId: createUser
+      requestBody:
+        description: Create a new user
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                passwordConfirm:
+                  type: string
+
+      responses:
+        '201':
+          description: Successful operation
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                message:
+                  type: string
+                success: boolean
+
+  /auth/verify:
+    post:
+      tags: 
+        - Auth
+      summary: Verify your email address
+      description: Verify your email address
+      operationId: verifyUser
+      requestBody:
+        description: Verify user email
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                otp:
+                  type: string
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad request
+
+  /auth/resendotp:
+    post:
+      tags:
+        - Auth
+      summary: Resend OTP to email
+      description: Resend OTP to email
+      opreationId: resendOtp
+      requestBody:
+        description: Resend OTP
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad request
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user
+      description: Login user
+      operationId: loginUser
+      requestBody:
+        description: Login
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad request
+
+  /auth/refresh:
     get:
       tags:
-      - users
+        - Auth
+      summary: Refresh user access token
+      description: Refresh user access token
+      operationId: refreshToken
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Forbidden
+
+  /auth/forgotpassword:
+    post:
+      tags:
+        - Auth
+      summary: Request for a new password
+      description: Request for a new password
+      operationId: forgotPassword
+      requestBody:
+        description: Request password reset
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+
+  /auth/resetpassword/{token}:
+    patch:
+      tags:
+        - Auth
+      summary: Reset yourpassword
+      description: Reset your password
+      operationId: resetPassword
+      parameters:
+        - name: token
+          in: path
+          description: Reset token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Reset password
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                password:
+                  type: string
+
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad request
+
+  /auth/logout:
+    get:
+      tags:
+        - Auth
+      summary: Logout user
+      description: Logout user
+      operationId: logoutUser
+      responses:
+        '204':
+          description: Successful operation
+        '401':
+          description: Unauthorized
+
+
+
+components:
+  schemas:
+    ApiResponses:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        success: 
+          type: boolean
+        message:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
