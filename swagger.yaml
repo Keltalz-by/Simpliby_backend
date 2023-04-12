@@ -39,9 +39,10 @@ paths:
               schema:
                 type: object
                 properties:
-                message:
-                  type: string
-                success: boolean
+                  message:
+                    type: string
+                  success: 
+                    type: boolean
 
   /auth/verify:
     post:
@@ -203,7 +204,48 @@ paths:
         '401':
           description: Unauthorized
 
+  /stores/create:
+    post:
+      tags:
+        - Store
+      summary: Create a new store
+      description: A verified user can create a new store
+      operationId: createStore
+      requestBody:
+        description: Create a new store
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                businessName:
+                  type: string
+                location:
+                  type: string
+                description:
+                  type: string
+                address:
+                  type: string
+                city:
+                  type: string
+                country:
+                  type: string
 
+      responses:
+        '201':
+          description: Successful operation
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  success: 
+                    type: boolean
 
 components:
   schemas:
