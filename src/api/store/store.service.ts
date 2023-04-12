@@ -1,8 +1,16 @@
 import StoreModel, { type Store } from '../store/store.model';
+import UserModel from '../user/user.model';
 
 export class StoreService {
-  public async createStore(storeData: Partial<Store>) {
-    return await (await StoreModel.create(storeData)).populate('owner', 'name');
+  public async createStore(storeData: Store): Promise<Store> {
+    const store = await (await StoreModel.create(storeData)).populate('owner', 'name');
+
+    const user = await UserModel.findOne({ _id: store.owner._id });
+
+    if (user?.role !== 'seller') {
+      await UserModel.updateOne({ _id: store.owner._id }, { $set: { role: 'seller' } });
+    }
+    return store;
   }
 
   public async updateStore(storeId: string, options: object) {

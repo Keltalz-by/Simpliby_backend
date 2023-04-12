@@ -2,9 +2,6 @@ import { object, string, type TypeOf } from 'zod';
 
 export const createStoreSchema = object({
   body: object({
-    owner: string({
-      required_error: 'Owner id is required'
-    }),
     businessName: string({
       required_error: 'Business Name is required'
     }),

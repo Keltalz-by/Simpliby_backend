@@ -15,7 +15,6 @@ export class StoreController {
       const storeData = req.body;
 
       const store = await this.storeService.createStore({ ...storeData, owner: userId });
-      await this.userService.updateUser(userId, { role: 'seller' });
 
       return res.status(201).json({ success: true, data: store });
     } catch (err: any) {
@@ -48,11 +47,6 @@ export class StoreController {
       logger.info(updatedStore);
 
       return res.status(200).json({ success: true, message: 'Store updated successfully' });
-
-      // if (checkForClass<Store>(store, Types.STORE)) {
-      //     console.log(store.businessName)
-      //     return res.status(200).json({ success: true, data: updatedStore })
-      // }
     } catch (err: any) {
       next(err);
     }
