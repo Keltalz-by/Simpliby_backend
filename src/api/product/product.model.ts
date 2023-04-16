@@ -12,11 +12,11 @@ import { Store } from '../store/store.model';
   }
 })
 export class Product {
-  @prop({ ref: () => Category, required: true })
-  public category: Ref<Category>;
-
   @prop({ ref: () => Store, required: true })
   public store: Ref<Store>;
+
+  @prop({ ref: () => Category, required: true })
+  public category: Ref<Category>;
 
   @prop({ required: true })
   public productName: string;
@@ -25,25 +25,25 @@ export class Product {
   public description: string;
 
   @prop()
-  public itemLocation: string;
+  public itemLocation?: string;
 
   @prop({ default: 'NGN (Naira)' })
-  public currency: string;
+  public currency?: string;
 
   @prop({ default: 0, required: true })
-  public price: number;
+  public price: string;
 
   @prop()
-  public reservationPrice: number;
+  public reservationPrice: string;
+
+  @prop({ required: true })
+  public productImages: [];
 
   @prop()
-  public productImages: string[];
-
-  @prop()
-  public productRackImage: string;
+  public productRackImage?: object;
 
   @prop({ default: true })
-  public inStock: boolean;
+  public inStock?: boolean;
 }
 
 const ProductModel = getModelForClass(Product);
