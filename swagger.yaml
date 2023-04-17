@@ -279,6 +279,7 @@ paths:
                   type: string
                 productImages:
                   type: array
+                  description: A maximum of 3 images can be uploaded
                   items:
                     type: string
                     format: binary
