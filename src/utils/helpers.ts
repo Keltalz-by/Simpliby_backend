@@ -1,4 +1,6 @@
 import otp from 'otp-generator';
+import fs from 'fs';
+import cloudinary from './cloudinary';
 
 interface IOptions {
   digits?: boolean;
@@ -9,6 +11,13 @@ interface IOptions {
 
 export function otpGenerator(length?: number, options?: IOptions) {
   return otp.generate(length, options);
+}
+
+export async function uploadToCloudinary(path: string, folderName: string) {
+  const images = await cloudinary.uploader.upload(path, { folder: folderName });
+  fs.unlinkSync(path);
+
+  return { url: images.secure_url, publicId: images.public_id };
 }
 
 export function minutesToDate(date: Date, minutes: number) {

@@ -6,6 +6,8 @@ const redisClient = createClient({
   url: REDIS_URL
 });
 
+// const redisClient = createClient()
+
 const connectRedis = async () => {
   try {
     await redisClient.connect();
