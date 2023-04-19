@@ -4,10 +4,11 @@ import CategoryModel from '../category/category.model';
 import StoreModel from '../store/store.model';
 import ProductModel, { type Product } from './product.model';
 
+// type QueryObj = Record<string, string
 export class ProductService {
   public async createProduct(productData: IProduct): Promise<Product> {
-    const category = await CategoryModel.findOne({ _id: productData.category });
-    const store = await StoreModel.findOne({ _id: productData.store });
+    const category = await CategoryModel.findOne({ _id: productData.categoryId });
+    const store = await StoreModel.findOne({ _id: productData.storeId });
 
     if (category === null) {
       throw new AppError(404, 'Category does not exist');
@@ -22,17 +23,28 @@ export class ProductService {
     }
 
     return await (
-      await (await ProductModel.create(productData)).populate('category', 'categoryName')
-    ).populate('store', 'businessName');
+      await (await ProductModel.create(productData)).populate('categoryId', 'categoryName')
+    ).populate('storeId', 'businessName');
   }
 
-  public async getAllProducts(): Promise<Product[]> {
-    return await ProductModel.find().populate('store', 'businessName').populate('category', 'categoryName');
+  public async getAllProducts(query: any): Promise<Product[]> {
+    const page = parseInt(query.page) * 1 ?? 1;
+    const limit = parseInt(query.limit) * 1 ?? 6;
+    const skip = (page - 1) * limit;
+    return await ProductModel.find({})
+      .skip(skip)
+      .limit(limit)
+      .populate('storeId', 'businessName')
+      .populate('categoryId', 'categoryName');
   }
 
-  public async getAllProductsInCategory(query: string): Promise<Product[]> {
-    const products = await ProductModel.find({ productName: { $regex: query, $options: 'i' } });
+  public async getAllProductsInCategory(): Promise<Product[]> {
+    const products = await ProductModel.find();
 
     return products;
+  }
+
+  public async totalProductsNumber(): Promise<number> {
+    return await ProductModel.countDocuments();
   }
 }

@@ -2,10 +2,10 @@ import { object, string, type TypeOf, any } from 'zod';
 
 const payload = {
   body: object({
-    store: string({
+    storeId: string({
       required_error: 'Store is required'
     }),
-    category: string({
+    categoryId: string({
       required_error: 'Product category is required'
     }),
     productName: string({

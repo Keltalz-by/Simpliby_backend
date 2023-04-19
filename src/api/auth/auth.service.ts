@@ -19,16 +19,16 @@ import {
   sendOtpVerificationMail,
   signJwt
 } from '../../utils';
-import type IUser from '../user/user.interface';
+import { type IUser } from '../user/user.interface';
 import ResetTokenModel from '../resetToken/resetToken.model';
 import OTPModel from '../otp/otp.model';
 
 export class AuthService {
-  public async signup(userData: IUser) {
+  public async signup(userData: Partial<User>): Promise<User> {
     const user = await UserModel.findOne({ email: userData.email });
 
     if (user !== null) {
-      throw new AppError(409, `User ${userData.email} already exist`);
+      throw new AppError(409, `User ${user.email} already exist`);
     }
 
     const newOtp: string = otpGenerator(4, {
@@ -40,7 +40,7 @@ export class AuthService {
 
     const newUser = await UserModel.create(userData);
     await OTPModel.create({ owner: newUser._id, code: newOtp });
-    await sendOtpVerificationMail(userData.name as string, userData.email, newOtp);
+    await sendOtpVerificationMail(newUser.name, newUser.email, newOtp);
 
     return newUser;
   }

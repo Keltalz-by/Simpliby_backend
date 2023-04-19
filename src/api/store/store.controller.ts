@@ -16,7 +16,7 @@ export class StoreController {
 
       const store = await this.storeService.createStore({ ...storeData, owner: userId });
 
-      return res.status(201).json({ success: true, data: store });
+      return res.status(201).json({ message: 'Store created successfully.', success: true, data: store });
     } catch (err: any) {
       next(err);
     }

@@ -22,6 +22,10 @@ export const privateFields = ['password', '__v', 'resetPasswordToken', 'resetPas
   }
 })
 export class User {
+  toJSON(): any {
+    throw new Error('Method not implemented.');
+  }
+
   @prop({ required: true })
   public name: string;
 

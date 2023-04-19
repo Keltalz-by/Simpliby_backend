@@ -19,9 +19,25 @@ export const createStoreSchema = object({
     }),
     country: string({
       required_error: 'Country is required'
+    }),
+    storeImages: object({
+      url: string({
+        required_error: 'Image url is required'
+      }),
+      publicId: string({
+        required_error: 'Image id is required'
+      })
     })
-    // images: string({}),
-    // logo: string({}),
+      .array()
+      .optional(),
+    logo: object({
+      url: string({
+        required_error: 'Image url is required'
+      }),
+      publicId: string({
+        required_error: 'Image id is required'
+      })
+    }).optional()
   })
 });
 

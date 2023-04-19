@@ -7,8 +7,8 @@ import { type IStore } from '../store/store.interface';
 
 export interface IProduct {
   _id?: string;
-  category: ICategory['_id'];
-  store: IStore['_id'];
+  categoryId: ICategory['_id'];
+  storeId: IStore['_id'];
   productName: string;
   description: string;
   itemLocation?: string;

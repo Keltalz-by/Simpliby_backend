@@ -5,6 +5,8 @@ tags:
     description: Everything about creating and owning a store
   - name: Product
     description: Everything about creating and managing a product
+  - name: User
+    description: Everything about managing users
 
 paths:
   /auth/register:
@@ -291,6 +293,44 @@ paths:
           description: Successful operation
         '400':
           description: Bad request
+
+  /users:
+    get:
+      tags:
+        - User
+      summary: Get all users
+      description: Endpoint to get all users
+      opeartionId: allUsers
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+
+
+  /users/{id}:
+    delete:
+      tags:
+        - User
+      summary: Delete user
+      description: Delete a user
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          description: User id to delete
+          required: true
+          schema:
+            type: string
+      
+      responses:
+        '204':
+          description: Successful operation
+        '404':
+          description: Not Found
 
 
 components:

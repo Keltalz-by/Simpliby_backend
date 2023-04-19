@@ -13,10 +13,10 @@ import { Store } from '../store/store.model';
 })
 export class Product {
   @prop({ ref: () => Store, required: true })
-  public store: Ref<Store>;
+  public storeId: Ref<Store>;
 
   @prop({ ref: () => Category, required: true })
-  public category: Ref<Category>;
+  public categoryId: Ref<Category>;
 
   @prop({ required: true })
   public productName: string;

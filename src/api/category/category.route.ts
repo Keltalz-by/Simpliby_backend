@@ -15,7 +15,10 @@ export class CategoryRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.use(deserializeUser, requireUser, restrictUser('STORE'));
+    this.router.use(deserializeUser, requireUser);
+    this.router.get(`${this.path}`, this.category.getAllCategory);
+    this.router.get(`${this.path}:categoryId/products`, this.category.getAllProductsInCategory);
+    this.router.use(deserializeUser, requireUser, restrictUser('seller'));
     this.router.post(`${this.path}create`, validateResource(createCategorySchema), this.category.createCategory);
   }
 }

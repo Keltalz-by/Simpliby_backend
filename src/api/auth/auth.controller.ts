@@ -8,7 +8,7 @@ import { OTPService } from '../otp/otp.service';
 import { type ResendOTPInput, type OtpInput } from '../otp/otp.schema';
 import { ACCESS_TOKEN_PRIVATE_KEY, REFRESH_TOKEN_PUBLIC_KEY, ACCESS_TOKEN_EXPIRESIN, NODE_ENV } from '../../config';
 import { type RegisterInput, type LoginInput, type ForgotPasswordInput, type ResetPasswordInput } from './auth.schema';
-import type IUser from '../user/user.interface';
+import type { IUser } from '../user/user.interface';
 
 const accessTokenCookieOptions: CookieOptions = {
   maxAge: 900000, // 15mins
@@ -42,13 +42,11 @@ export class AuthController {
       const userData: IUser = req.body;
       const newUser = await this.authService.signup(userData);
 
-      return res
-        .status(201)
-        .json({
-          success: true,
-          message: 'Check your email for verification code',
-          data: omit(newUser.toJSON(), privateFields)
-        });
+      return res.status(201).json({
+        success: true,
+        message: 'Check your email for verification code',
+        data: omit(newUser.toJSON(), privateFields)
+      });
     } catch (error: any) {
       next(error);
     }

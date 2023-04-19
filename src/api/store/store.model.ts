@@ -5,29 +5,29 @@ export class Store {
   @prop({ ref: () => User })
   public owner: Ref<User>;
 
-  @prop()
+  @prop({ required: true })
   public businessName: string;
 
-  @prop()
+  @prop({ required: true })
   public location: string;
 
-  @prop()
+  @prop({ required: true })
   public description: string;
 
-  @prop()
+  @prop({ required: true })
   public address: string;
 
-  @prop()
+  @prop({ required: true })
   public city: string;
 
-  @prop()
+  @prop({ required: true, default: 'Nigeria' })
   public country: string;
 
-  // @prop()
-  // public images: string[];
+  @prop()
+  public storeImages: object[];
 
-  // @prop()
-  // public logo: string;
+  @prop()
+  public logo: object;
 }
 
 const StoreModel = getModelForClass(Store);

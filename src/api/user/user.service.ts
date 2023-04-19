@@ -1,3 +1,4 @@
+import { AppError } from '../../utils';
 import UserModel from '../user/user.model';
 
 export class UserService {
@@ -15,6 +16,16 @@ export class UserService {
 
   public async findAllUsers() {
     return await UserModel.find({}).orFail().exec();
+  }
+
+  public async deleteUser(userId: string) {
+    const user = await UserModel.findOne({ _id: userId });
+
+    if (user === null) {
+      throw new AppError(404, 'User not found');
+    }
+
+    return await user.deleteOne();
   }
 
   public async updateUser(userId: string, options: object) {

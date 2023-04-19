@@ -44,19 +44,21 @@ export class ProductController {
     }
   };
 
-  // public getAllCategoryProducts = async (req: Request, res: Response, next: NextFunction) => {
-  //   try {
-  //     const search = req.query.search
-  //     const products = await this.productService.getAllProductsInCategory(search)
-  //     return products
-  //   } catch (err: any) {
-  //     next(err)
-  //   }
-  // }
+  public getAllCategoryProducts = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const products = await this.productService.getAllProductsInCategory();
+
+      return res.status(200).json({ count: products.length, success: true, data: products });
+    } catch (err: any) {
+      next(err);
+    }
+  };
 
   public getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const products = await this.productService.getAllProducts();
+      const query = req.query;
+      const { page, limit } = query;
+      const products = await this.productService.getAllProducts({ page, limit });
 
       return res.status(200).json({ success: true, data: products, count: products.length });
     } catch (err: any) {
