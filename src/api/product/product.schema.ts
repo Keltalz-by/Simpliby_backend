@@ -1,16 +1,30 @@
-import { object, string, number, type TypeOf } from 'zod';
+import { object, string, type TypeOf, any } from 'zod';
 
 const payload = {
   body: object({
+    storeId: string({
+      required_error: 'Store is required'
+    }),
+    categoryId: string({
+      required_error: 'Product category is required'
+    }),
     productName: string({
       required_error: 'Product name is required'
     }),
     description: string({
       required_error: 'Product description is required'
     }),
-    price: number({
+    price: string({
       required_error: 'Price is required'
-    })
+    }),
+    reservationPrice: string({
+      required_error: 'Reservation price is required'
+    }),
+    currency: string().optional(),
+    itemLocation: string().optional(),
+    inStock: string().optional(),
+    productImages: any(),
+    productRackImage: any().optional()
   })
 };
 
