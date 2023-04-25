@@ -19,7 +19,11 @@ export const {
   ACCESS_TOKEN_EXPIRESIN,
   REFRESH_TOKEN_EXPIRESIN,
   REDIS_URL,
-  SERVER_URL
+  SERVER_URL,
+  LOCAL_SERVER_URL,
+  CLOUD_NAME,
+  API_KEY,
+  API_SECRET
 } = process.env;
 
 export const CREDENTIALS = process.env.CREDENTIALS === 'true';

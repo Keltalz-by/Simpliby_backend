@@ -2,8 +2,6 @@ import { AppError } from '../../utils';
 import { type DocumentType, modelOptions, prop, Severity, pre, getModelForClass } from '@typegoose/typegoose';
 import argon2 from 'argon2';
 
-export const privateFields = ['password', '__v', 'resetPasswordToken', 'resetPasswordTokenExpiration'];
-
 @pre<User>('save', async function () {
   if (!this.isModified('password')) {
     return;

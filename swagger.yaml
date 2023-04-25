@@ -3,6 +3,10 @@ tags:
     description: Everything about authentication
   - name: Store
     description: Everything about creating and owning a store
+  - name: Product
+    description: Everything about creating and managing a product
+  - name: User
+    description: Everything about managing users
 
 paths:
   /auth/register:
@@ -246,6 +250,88 @@ paths:
                     type: string
                   success: 
                     type: boolean
+
+  /products:
+    post:
+      tags:
+        - Product
+      summary: Create a new product
+      description: A seller can create a new product
+      operationId: createProduct
+      requestBody:
+        description: Create a new store
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                storeId:
+                  type: string
+                categoryId:
+                  type: string
+                productName:
+                  type: string
+                description:
+                  type: string
+                itemLocation:
+                  type: string
+                price:
+                  type: string
+                reservationPrice:
+                  type: string
+                productImages:
+                  type: array
+                  description: A maximum of 3 images can be uploaded
+                  items:
+                    type: string
+                    format: binary
+                productRackImage:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Successful operation
+        '400':
+          description: Bad request
+
+  /users:
+    get:
+      tags:
+        - User
+      summary: Get all users
+      description: Endpoint to get all users
+      opeartionId: allUsers
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+
+
+  /users/{id}:
+    delete:
+      tags:
+        - User
+      summary: Delete user
+      description: Delete a user
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          description: User id to delete
+          required: true
+          schema:
+            type: string
+      
+      responses:
+        '204':
+          description: Successful operation
+        '404':
+          description: Not Found
+
 
 components:
   schemas:

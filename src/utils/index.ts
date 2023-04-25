@@ -1,4 +1,5 @@
 import redisClient from './redisDb';
+import cloudinary from './cloudinary';
 
 export { AppError } from './appError';
 export { logger, stream } from './logger';
@@ -9,8 +10,11 @@ export {
   verifyEmailTemplate,
   requestPasswordTemplate,
   emailVerifiedTemplate,
-  passwordResetCompleteTemplate
+  passwordResetCompleteTemplate,
+  uploadToCloudinary
 } from './helpers';
 export { sendOtpVerificationMail } from './sendOtpVerificationMail';
 export { signJwt, verifyJwt } from './jwt';
+export { upload } from './multer';
 export { redisClient };
+export { cloudinary };

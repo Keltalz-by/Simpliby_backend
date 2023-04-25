@@ -1,15 +1,17 @@
 import StoreModel, { type Store } from '../store/store.model';
 import UserModel from '../user/user.model';
+import { type IStore } from './store.interface';
 
 export class StoreService {
-  public async createStore(storeData: Store): Promise<Store> {
+  public async createStore(storeData: IStore): Promise<Store> {
     const store = await (await StoreModel.create(storeData)).populate('owner', 'name');
 
     const user = await UserModel.findOne({ _id: store.owner._id });
 
     if (user?.role !== 'seller') {
-      await UserModel.updateOne({ _id: store.owner._id }, { $set: { role: 'seller' } });
+      await user?.updateOne({ $set: { role: 'seller' } });
     }
+
     return store;
   }
 

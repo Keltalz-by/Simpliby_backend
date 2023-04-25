@@ -1,14 +1,13 @@
 import { type Request, type Response, type NextFunction, type CookieOptions } from 'express';
-import { omit } from 'lodash';
 import { AppError, redisClient, sendMail, signJwt, verifyJwt, requestPasswordTemplate } from '../../utils';
-import { privateFields } from '../user/user.model';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { OTPService } from '../otp/otp.service';
 import { type ResendOTPInput, type OtpInput } from '../otp/otp.schema';
 import { ACCESS_TOKEN_PRIVATE_KEY, REFRESH_TOKEN_PUBLIC_KEY, ACCESS_TOKEN_EXPIRESIN, NODE_ENV } from '../../config';
 import { type RegisterInput, type LoginInput, type ForgotPasswordInput, type ResetPasswordInput } from './auth.schema';
-import type IUser from '../user/user.interface';
+import type { IUser } from '../user/user.interface';
+import { type ILogin } from './auth.interface';
 
 const accessTokenCookieOptions: CookieOptions = {
   maxAge: 900000, // 15mins
@@ -42,13 +41,11 @@ export class AuthController {
       const userData: IUser = req.body;
       const newUser = await this.authService.signup(userData);
 
-      return res
-        .status(201)
-        .json({
-          success: true,
-          message: 'Check your email for verification code',
-          data: omit(newUser.toJSON(), privateFields)
-        });
+      return res.status(201).json({
+        success: true,
+        message: 'Check your email for verification code',
+        data: newUser
+      });
     } catch (error: any) {
       next(error);
     }
@@ -56,7 +53,7 @@ export class AuthController {
 
   public loginUser = async (req: Request<LoginInput>, res: Response, next: NextFunction) => {
     try {
-      const userData: IUser = req.body;
+      const userData: ILogin = req.body;
 
       const { accessToken, refreshToken } = await this.authService.login(userData);
 
