@@ -3,6 +3,7 @@ import { AppError } from '../../utils';
 import CategoryModel from '../category/category.model';
 import StoreModel from '../store/store.model';
 import ProductModel, { type Product } from './product.model';
+import { type QueryObj } from '../../common';
 
 // type QueryObj = Record<string, string
 export class ProductService {
@@ -27,15 +28,15 @@ export class ProductService {
     ).populate('storeId', 'businessName');
   }
 
-  public async getAllProducts(query: any): Promise<Product[]> {
+  public async getAllProducts(query: QueryObj): Promise<Product[]> {
     const page = parseInt(query.page) * 1 ?? 1;
     const limit = parseInt(query.limit) * 1 ?? 6;
     const skip = (page - 1) * limit;
-    return await ProductModel.find({})
-      .skip(skip)
-      .limit(limit)
-      .populate('storeId', 'businessName')
-      .populate('categoryId', 'categoryName');
+
+    const products = await ProductModel.find().limit(limit).skip(skip);
+
+    return products;
+    // const features = (await (await new APIFeatures(ProductModel, query).filter()).sort()).limitFields()
   }
 
   public async getAllProductsInCategory(): Promise<Product[]> {

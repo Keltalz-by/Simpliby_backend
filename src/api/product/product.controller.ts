@@ -56,8 +56,7 @@ export class ProductController {
 
   public getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const query = req.query;
-      const { page, limit } = query;
+      const { page, limit } = req.query as any;
       const products = await this.productService.getAllProducts({ page, limit });
 
       return res.status(200).json({ success: true, data: products, count: products.length });
