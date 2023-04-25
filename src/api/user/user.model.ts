@@ -2,8 +2,6 @@ import { AppError } from '../../utils';
 import { type DocumentType, modelOptions, prop, Severity, pre, getModelForClass } from '@typegoose/typegoose';
 import argon2 from 'argon2';
 
-export const privateFields = ['password', '__v', 'resetPasswordToken', 'resetPasswordTokenExpiration'];
-
 @pre<User>('save', async function () {
   if (!this.isModified('password')) {
     return;
@@ -22,10 +20,6 @@ export const privateFields = ['password', '__v', 'resetPasswordToken', 'resetPas
   }
 })
 export class User {
-  toJSON(): any {
-    throw new Error('Method not implemented.');
-  }
-
   @prop({ required: true })
   public name: string;
 

@@ -1,5 +1,4 @@
 import { type DocumentType } from '@typegoose/typegoose';
-import { omit } from 'lodash';
 import crypto from 'crypto';
 import argon2 from 'argon2';
 import {
@@ -8,7 +7,7 @@ import {
   ACCESS_TOKEN_PRIVATE_KEY,
   REFRESH_TOKEN_PRIVATE_KEY
 } from '../../config';
-import UserModel, { privateFields, type User } from '../user/user.model';
+import UserModel, { type User } from '../user/user.model';
 import {
   AppError,
   emailVerifiedTemplate,
@@ -19,9 +18,9 @@ import {
   sendOtpVerificationMail,
   signJwt
 } from '../../utils';
-import { type IUser } from '../user/user.interface';
 import ResetTokenModel from '../resetToken/resetToken.model';
 import OTPModel from '../otp/otp.model';
+import { type ILogin } from './auth.interface';
 
 export class AuthService {
   public async signup(userData: Partial<User>): Promise<User> {
@@ -45,11 +44,11 @@ export class AuthService {
     return newUser;
   }
 
-  public async login(userData: IUser) {
+  public async login(userData: ILogin) {
     const user = await UserModel.findOne({ email: userData.email });
 
     if (user === null) {
-      throw new AppError(404, `User with email ${userData.email} does not exist`);
+      throw new AppError(404, 'Invalid email or password');
     }
 
     const isValidPassword = await user.validatePassword(userData.password);
@@ -98,7 +97,7 @@ export class AuthService {
       expiresIn: REFRESH_TOKEN_EXPIRESIN
     });
 
-    await redisClient.set(JSON.stringify(user._id), JSON.stringify(user.toJSON(), omit(privateFields)), {
+    await redisClient.set(JSON.stringify(user._id), JSON.stringify(user), {
       EX: 60 * 60
     });
 
