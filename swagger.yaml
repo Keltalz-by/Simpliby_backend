@@ -9,6 +9,7 @@ tags:
     description: Everything about creating and managing a product
   - name: Order
     description: Everything about creating and managing orders
+  - name: ToBuy
 
 paths:
   /auth/register:
@@ -196,9 +197,9 @@ paths:
         '401':
           description: Unauthorized
 
-#################
+  #################
   # Store API #
-#################
+  #################
 
   /stores/create:
     post:
@@ -324,7 +325,7 @@ paths:
           description: Not Found
 
   #################
-    # Order API #
+  # Order API #
   #################
 
   /orders:
@@ -369,6 +370,57 @@ paths:
           description: Forbidden
         '404':
           description: Not Found
+        '500':
+          description: Internal Server Error
+
+  #################
+  # ToBuy API #
+  #################
+  /tobuy:
+    post:
+      tags:
+        - ToBuy
+      summary: Create a new to buy list
+      operationId: CreateToBuy
+      requestBody:
+        description: Create a new to buy list
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateToBuy'
+      responses:
+        '201':
+          description: Success
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+  
+  /tobuy/{id}:
+    patch:
+      tags:
+        - ToBuy
+      summary: Complete a tobuy
+      operationId: CompleteToBuy
+      parameters:
+        - name: id
+          in: path
+          description: ID of the tobuy to complete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
 
 components:
   securitySchemes:
@@ -432,3 +484,9 @@ components:
         country:
           type: string
           example: Nigeria
+    CreateToBuy:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Buy a new phone

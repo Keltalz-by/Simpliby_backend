@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { set } from 'mongoose';
-import { type Routes } from '@src/common';
+import { type Routes } from './common';
 import { ErrorHandler } from './middlewares';
 import { connectDB, logger, stream } from './utils';
 import { NODE_ENV, PORT, ORIGIN, CREDENTIALS, SERVER_URL } from './config';
