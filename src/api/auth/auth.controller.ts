@@ -123,7 +123,7 @@ export class AuthController {
 
       res.cookie('accessToken', accessToken, accessTokenCookieOptions);
       res.cookie('loggedIn', true, accessTokenCookieOptions);
-      res.status(200).json({ success: true, data: { accessToken } });
+      return res.status(200).json({ success: true, data: { accessToken } });
     } catch (err: any) {
       next(err);
     }

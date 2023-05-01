@@ -1,8 +1,17 @@
-import { Ref, getModelForClass, prop } from '@typegoose/typegoose';
-import { User } from '../user/user.model';
+import { Ref, Severity, getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
+import { type User } from '../user/user.model';
 
+@modelOptions({
+  schemaOptions: {
+    collection: 'stores',
+    timestamps: true
+  },
+  options: {
+    allowMixed: Severity.ALLOW
+  }
+})
 export class Store {
-  @prop({ ref: () => User })
+  @prop({ ref: 'User', required: true })
   public owner: Ref<User>;
 
   @prop({ required: true })

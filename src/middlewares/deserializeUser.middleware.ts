@@ -19,7 +19,7 @@ export const deserializeUser = async (req: Request, res: Response, next: NextFun
     const decoded = verifyJwt<{ sub: string }>(accessToken as string, ACCESS_TOKEN_PUBLIC_KEY as string);
 
     if (decoded === null) {
-      next(new AppError(401, 'Invalid token'));
+      next(new AppError(401, 'You are not logged in'));
       return;
     }
 
