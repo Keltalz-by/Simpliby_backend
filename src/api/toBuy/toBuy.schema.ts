@@ -6,7 +6,7 @@ export const createToBuySchema = object({
       required_error: 'Title is required'
     }),
     isCompleted: boolean().optional()
-  })
+  }).array()
 });
 
 export type ToBuyInput = TypeOf<typeof createToBuySchema>['body'];

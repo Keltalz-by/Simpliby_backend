@@ -10,7 +10,11 @@ export class ToBuyController {
       const data = req.body;
       const userId = res.locals.user._id;
 
-      const toBuy = await this.toBuyService.createToBuy({ ...data, userId });
+      const toBuy = await this.toBuyService.createToBuy(
+        data.map((item) => {
+          return { title: item.title, userId };
+        })
+      );
 
       return res.status(201).json({ success: true, data: toBuy });
     } catch (err: any) {

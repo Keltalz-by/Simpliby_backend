@@ -3,8 +3,8 @@ import ToBuyModel, { type ToBuy } from './toBuy.model';
 import { AppError } from '../../utils';
 
 export class ToBuyService {
-  public async createToBuy(data: ToBuy) {
-    return await ToBuyModel.create(data);
+  public async createToBuy(data: ToBuy[]) {
+    return await ToBuyModel.insertMany(data);
   }
 
   public async completeToBuy(id: string, userId: string) {
@@ -18,7 +18,7 @@ export class ToBuyService {
       throw new AppError(404, 'ToBuy not found');
     }
 
-    if (String(toBuy._id) !== String(userId)) {
+    if (String(toBuy.userId) !== String(userId)) {
       throw new AppError(403, 'Not your tobuy');
     }
 

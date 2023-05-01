@@ -396,7 +396,7 @@ paths:
           description: Bad request
         '500':
           description: Internal server error
-  
+
   /tobuy/{id}:
     patch:
       tags:
@@ -485,8 +485,12 @@ components:
           type: string
           example: Nigeria
     CreateToBuy:
-      type: object
-      properties:
-        title:
-          type: string
-          example: Buy a new phone
+      type: array
+      items:
+        type: object
+        properties:
+          title:
+            type: string
+      example:
+        - title: Buy a new phone
+        - title: Repair my laptop
