@@ -18,5 +18,6 @@ export class ToBuyRoute implements Routes {
     this.router.use(deserializeUser, requireUser);
     this.router.post(`${this.path}`, validateResource(createToBuySchema), this.toBuy.createToBuy);
     this.router.patch(`${this.path}:id`, this.toBuy.completeToBuy);
+    this.router.delete(`${this.path}:id`, this.toBuy.deleteToBuy);
   }
 }

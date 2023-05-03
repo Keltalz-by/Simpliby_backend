@@ -26,4 +26,22 @@ export class ToBuyService {
     await toBuy.save();
     return toBuy;
   }
+
+  public async deleteToBuy(id: string, userId: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new AppError(400, 'Invalid ID');
+    }
+
+    const toBuy = await ToBuyModel.findOne({ _id: id });
+
+    if (toBuy === null) {
+      throw new AppError(404, 'ToBuy not found');
+    }
+
+    if (String(toBuy.userId) !== String(userId)) {
+      throw new AppError(403, 'Not your tobuy');
+    }
+
+    return await toBuy.deleteOne();
+  }
 }

@@ -33,4 +33,16 @@ export class ToBuyController {
       next(error);
     }
   };
+
+  public deleteToBuy = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const userId = res.locals.user._id;
+      await this.toBuyService.deleteToBuy(id, userId);
+
+      return res.sendStatus(204);
+    } catch (error: any) {
+      next(error);
+    }
+  };
 }
