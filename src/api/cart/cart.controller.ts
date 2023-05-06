@@ -30,6 +30,19 @@ export class CartController {
     }
   };
 
+  public deleteProductfromCart = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = res.locals.user._id;
+      const { productId } = req.params;
+
+      const cart = await this.cartService.deleteProductFromCart(userId, productId);
+
+      return res.status(200).json({ success: true, data: cart });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
   public deleteUserCart = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = res.locals.user._id;

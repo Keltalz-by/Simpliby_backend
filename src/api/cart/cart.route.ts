@@ -18,6 +18,7 @@ export class CartRoute implements Routes {
     this.router.use(deserializeUser, requireUser);
     this.router.post(`${this.path}`, validateResource(addToCartSchema), this.cart.AddProductToCart);
     this.router.get(`${this.path}`, this.cart.getUserCart);
+    this.router.patch(`${this.path}:productId`, this.cart.deleteProductfromCart);
     this.router.delete(`${this.path}`, this.cart.deleteUserCart);
   }
 }

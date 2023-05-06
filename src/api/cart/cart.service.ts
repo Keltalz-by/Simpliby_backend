@@ -69,6 +69,40 @@ export class CartService {
     return cart;
   }
 
+  public async deleteProductFromCart(userId: string, productId: string) {
+    const cart = await CartModel.findOne({ owner: userId });
+
+    if (!Types.ObjectId.isValid(productId)) {
+      throw new AppError(400, 'Invalid product ID');
+    }
+
+    const product = await ProductModel.findOne({ _id: productId });
+
+    if (product === null) {
+      throw new AppError(404, 'Product not found');
+    }
+
+    if (cart === null) {
+      throw new AppError(404, 'Cart not found');
+    }
+
+    const productIndex = cart.items.findIndex((item) => item.product === productId);
+    if (productIndex > -1) {
+      const myProduct = cart.items[productIndex];
+      cart.totalPrice -= myProduct.price * myProduct.quantity;
+      cart.items.splice(productIndex, 1);
+
+      if (cart.items.length < 1) {
+        await cart.deleteOne();
+        return;
+      }
+
+      return await cart.save();
+    }
+
+    return cart;
+  }
+
   public async deleteUserCart(userId: string) {
     const cart = await CartModel.findOne({ owner: userId });
 
