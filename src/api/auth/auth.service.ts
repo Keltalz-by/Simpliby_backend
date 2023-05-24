@@ -63,7 +63,7 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.signToken(user);
 
-    return { accessToken, refreshToken };
+    return { user, accessToken, refreshToken };
   }
 
   public async verifyEmail(userId: string, otp: string) {

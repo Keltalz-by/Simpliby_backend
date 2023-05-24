@@ -55,12 +55,12 @@ export class AuthController {
     try {
       const userData: ILogin = req.body;
 
-      const { accessToken, refreshToken } = await this.authService.login(userData);
+      const { accessToken, refreshToken, user } = await this.authService.login(userData);
 
       res.cookie('accessToken', accessToken, accessTokenCookieOptions);
       res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions);
       res.cookie('loggedIn', true, accessTokenCookieOptions);
-      res.status(200).json({ success: true, data: { accessToken } });
+      res.status(200).json({ success: true, data: { userId: user._id, accessToken } });
     } catch (error: any) {
       next(error);
     }
