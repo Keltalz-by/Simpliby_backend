@@ -15,12 +15,13 @@ export class UserController {
     }
   };
 
-  public getUserProfile = async (req: Request, res: Response, next: NextFunction) => {
+  public getUserProfile = async (_req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = res.locals.user._id;
-      const user = await this.userService.findUser({ _id: userId });
+      const user = res.locals.user;
 
-      return res.status(200).json({ success: true, data: user });
+      const data = await this.userService.findUser({ _id: user._id });
+
+      return res.status(200).json({ success: true, data });
     } catch (error: any) {
       next(error);
     }
@@ -29,7 +30,7 @@ export class UserController {
   public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { userId } = req.params;
-      const id = res.locals.user._id;
+      const id = res.locals.user.user;
 
       if (!Types.ObjectId.isValid(userId)) {
         next(new AppError(400, 'Invalid user ID'));

@@ -11,7 +11,7 @@ export class UserService {
   }
 
   public async findUser(option: object) {
-    return await UserModel.findOne(option);
+    return await UserModel.findOne(option).select('-password -createdAt -updatedAt -__v');
   }
 
   public async findAllUsers() {

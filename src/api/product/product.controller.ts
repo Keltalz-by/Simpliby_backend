@@ -44,7 +44,7 @@ export class ProductController {
     }
   };
 
-  public getAllCategoryProducts = async (req: Request, res: Response, next: NextFunction) => {
+  public getAllCategoryProducts = async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const products = await this.productService.getAllProductsInCategory();
 

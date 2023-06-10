@@ -11,7 +11,9 @@ export {
   requestPasswordTemplate,
   emailVerifiedTemplate,
   passwordResetCompleteTemplate,
-  uploadToCloudinary
+  uploadToCloudinary,
+  createToken,
+  accessTokenCookieOptions
 } from './helpers';
 export { sendOtpVerificationMail } from './sendOtpVerificationMail';
 export { signJwt, verifyJwt } from './jwt';

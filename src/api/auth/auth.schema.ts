@@ -44,18 +44,22 @@ export const resetPasswordSchema = object({
     userId: string({
       required_error: 'User ID is required'
     }),
+    otp: string({
+      required_error: 'OTP is required'
+    }),
     password: string({
       required_error: 'Password is required'
-    }).min(6, 'Password length must be at least 6 characters')
-  }),
-  params: object({
-    token: string({
-      required_error: 'token is required'
+    }).min(6, 'Password length must be at least 6 characters'),
+    passwordConfirm: string({
+      required_error: 'Password confirm is required'
     })
+  }).refine((data) => data.password === data.passwordConfirm, {
+    path: ['passwordConfirm'],
+    message: 'Passwords are not the same'
   })
 });
 
 export type RegisterInput = TypeOf<typeof registerSchema>['body'];
 export type LoginInput = TypeOf<typeof loginSchema>['body'];
 export type ForgotPasswordInput = TypeOf<typeof forgotPasswordSchema>['body'];
-export type ResetPasswordInput = TypeOf<typeof resetPasswordSchema>['params'];
+export type ResetPasswordInput = TypeOf<typeof resetPasswordSchema>['body'];

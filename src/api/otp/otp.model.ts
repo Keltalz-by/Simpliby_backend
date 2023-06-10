@@ -13,7 +13,8 @@ import { User } from '../user/user.model';
 })
 @modelOptions({
   schemaOptions: {
-    collection: 'otp'
+    collection: 'otp',
+    timestamps: true
   },
   options: {
     allowMixed: Severity.ALLOW
@@ -26,8 +27,8 @@ export class OTP {
   @prop({ required: true })
   public code: string;
 
-  @prop({ default: Date.now(), expires: 5 * 60 * 1000 })
-  public createdAt: Date;
+  @prop({ default: null })
+  public expiration: Date;
 
   async validateOTP(this: DocumentType<OTP>, code: string) {
     try {

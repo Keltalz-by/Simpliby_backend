@@ -9,14 +9,13 @@ export function signJwt(payload: Object, key: string, options: jwt.SignOptions =
   });
 }
 
-export function verifyJwt<T>(token: string, key: string): T | null {
+export const verifyJwt = <T>(token: string, key: string): T | null => {
   try {
     const publicKey = Buffer.from(key, 'base64').toString('ascii');
 
-    const decoded = jwt.verify(token, publicKey) as T;
-    return decoded;
+    return jwt.verify(token, publicKey) as T;
   } catch (err: any) {
     logger.error(err.message);
     return null;
   }
-}
+};

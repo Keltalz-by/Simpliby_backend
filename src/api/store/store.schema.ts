@@ -41,4 +41,13 @@ export const createStoreSchema = object({
   })
 });
 
+export const searchStoreSchema = object({
+  body: object({
+    name: string({
+      required_error: 'Store Name is required'
+    }).min(1, 'Please provide a store name')
+  })
+});
+
 export type CreateStoreInput = TypeOf<typeof createStoreSchema>['body'];
+export type SearchStoreInput = TypeOf<typeof searchStoreSchema>['body'];

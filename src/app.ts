@@ -8,10 +8,10 @@ import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { set } from 'mongoose';
+import mongoSanitize from 'express-mongo-sanitize';
 import { type Routes } from './common';
-import { ErrorHandler } from './middlewares';
-import { connectDB, logger, stream } from './utils';
+import { ErrorHandler, NotFoundError, limiter } from './middlewares';
+import { logger, stream } from './utils';
 import { NODE_ENV, PORT, ORIGIN, CREDENTIALS, SERVER_URL } from './config';
 
 export class App {
@@ -24,7 +24,8 @@ export class App {
     this.port = PORT ?? 5000;
     this.env = NODE_ENV ?? 'development';
 
-    this.connectToDatabase();
+    this.app.disable('x-powered-by');
+
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
@@ -34,21 +35,15 @@ export class App {
   public listen() {
     const server = http.createServer(this.app);
     server.listen(this.port, () => {
-      logger.info(`==== ENV: ${this.env} ====`);
+      logger.info(`============================`);
+      logger.info(`===== ENV: ${this.env} =====`);
       logger.info(`App listening on port ${this.port}`);
+      logger.info(`============================`);
     });
   }
 
   public runServer() {
     return this.app;
-  }
-
-  private connectToDatabase() {
-    if (this.env !== 'production') {
-      set('debug', true);
-    }
-
-    void connectDB();
   }
 
   private initializeMiddlewares() {
@@ -60,6 +55,8 @@ export class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
+    this.app.use(limiter);
+    this.app.use(mongoSanitize());
   }
 
   private initializeRoutes(routes: Routes[]) {
@@ -91,6 +88,7 @@ export class App {
   }
 
   private initializeErrorHandler() {
+    this.app.use(NotFoundError);
     this.app.use(ErrorHandler);
   }
 }

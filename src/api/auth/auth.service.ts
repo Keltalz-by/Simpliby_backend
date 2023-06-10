@@ -1,29 +1,25 @@
-import { type DocumentType } from '@typegoose/typegoose';
-import crypto from 'crypto';
-import argon2 from 'argon2';
-import {
-  ACCESS_TOKEN_EXPIRESIN,
-  REFRESH_TOKEN_EXPIRESIN,
-  ACCESS_TOKEN_PRIVATE_KEY,
-  REFRESH_TOKEN_PRIVATE_KEY
-} from '../../config';
-import UserModel, { type User } from '../user/user.model';
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
+/* eslint-disable @typescript-eslint/no-confusing-void-expression */
+import { ACCESS_TOKEN_EXPIRESIN, ACCESS_TOKEN_PRIVATE_KEY, REFRESH_TOKEN_PUBLIC_KEY } from '../../config';
+import UserModel from '../user/user.model';
 import {
   AppError,
   emailVerifiedTemplate,
   otpGenerator,
   passwordResetCompleteTemplate,
-  redisClient,
   sendMail,
   sendOtpVerificationMail,
-  signJwt
+  signJwt,
+  verifyJwt
 } from '../../utils';
-import ResetTokenModel from '../resetToken/resetToken.model';
 import OTPModel from '../otp/otp.model';
-import { type ILogin } from './auth.interface';
+import { type IRegister, type ILogin } from './auth.interface';
+import { UserService } from '../user/user.service';
 
 export class AuthService {
-  public async signup(userData: Partial<User>): Promise<User> {
+  public userService = new UserService();
+
+  public async signup(userData: IRegister) {
     const user = await UserModel.findOne({ email: userData.email });
 
     if (user !== null) {
@@ -37,8 +33,11 @@ export class AuthService {
       specialChars: false
     });
 
+    let tokenExpiration: any = new Date();
+    tokenExpiration = tokenExpiration.setMinutes(tokenExpiration.getMinutes() + 20);
+
     const newUser = await UserModel.create(userData);
-    await OTPModel.create({ owner: newUser._id, code: newOtp });
+    await OTPModel.create({ owner: newUser._id, code: newOtp, expiration: tokenExpiration });
     await sendOtpVerificationMail(newUser.name, newUser.email, newOtp);
 
     return newUser;
@@ -48,7 +47,7 @@ export class AuthService {
     const user = await UserModel.findOne({ email: userData.email });
 
     if (user === null) {
-      throw new AppError(404, 'Invalid email or password');
+      throw new AppError(400, 'Invalid email or password');
     }
 
     const isValidPassword = await user.validatePassword(userData.password);
@@ -61,9 +60,7 @@ export class AuthService {
       throw new AppError(400, 'Please verify your email');
     }
 
-    const { accessToken, refreshToken } = await this.signToken(user);
-
-    return { user, accessToken, refreshToken };
+    return user;
   }
 
   public async verifyEmail(userId: string, otp: string) {
@@ -71,13 +68,17 @@ export class AuthService {
     const user = await UserModel.findOne({ _id: userId });
 
     if (otpRecord === null) {
-      throw new AppError(404, 'User does not exists or has been verified or OTP has expired');
+      throw new AppError(400, 'User does not exists or has been verified or OTP has expired');
     }
 
     const isOtpValid = await otpRecord.validateOTP(otp);
 
     if (!isOtpValid) {
       throw new AppError(400, 'Invalid OTP.');
+    }
+
+    if (otpRecord.expiration < new Date(Date.now())) {
+      throw new AppError(400, 'OTP is expired. Request for another one.');
     }
 
     await UserModel.updateOne({ _id: userId }, { $set: { verified: true } });
@@ -88,26 +89,28 @@ export class AuthService {
     return await sendMail(user?.email as string, 'Email Verification Successful', message);
   }
 
-  public async signToken(user: DocumentType<User>) {
-    const accessToken = signJwt({ sub: user._id }, ACCESS_TOKEN_PRIVATE_KEY as string, {
+  public async refreshAccessToken(refreshToken: string) {
+    const decoded = verifyJwt<{ userId: string }>(refreshToken, REFRESH_TOKEN_PUBLIC_KEY as string);
+
+    if (decoded === null) {
+      throw new AppError(403, 'Could not refresh access token');
+    }
+    const user = await this.userService.findUser({ _id: JSON.parse(decoded.userId) });
+    if (user === null) {
+      throw new AppError(401, 'User not logged in');
+    }
+
+    const newAccessToken = signJwt({ userId: JSON.stringify(user._id) }, ACCESS_TOKEN_PRIVATE_KEY as string, {
       expiresIn: ACCESS_TOKEN_EXPIRESIN
     });
 
-    const refreshToken = signJwt({ sub: user._id }, REFRESH_TOKEN_PRIVATE_KEY as string, {
-      expiresIn: REFRESH_TOKEN_EXPIRESIN
-    });
-
-    await redisClient.set(JSON.stringify(user._id), JSON.stringify(user), {
-      EX: 60 * 60
-    });
-
-    return { accessToken, refreshToken };
+    return newAccessToken;
   }
 
   public async resendOtp(userId: string, email: string) {
     const user = await UserModel.findOne({ email });
 
-    if (user !== null) {
+    if (user !== null && String(user._id) === userId) {
       if (user.verified) {
         throw new AppError(400, 'User already verified');
       }
@@ -121,13 +124,16 @@ export class AuthService {
         specialChars: false
       });
 
-      await OTPModel.create({ owner: userId, code: newOtp });
+      let tokenExpiration: any = new Date();
+      tokenExpiration = tokenExpiration.setMinutes(tokenExpiration.getMinutes() + 20);
+
+      await OTPModel.create({ owner: userId, code: newOtp, expiration: tokenExpiration });
       return await sendOtpVerificationMail(user.name, user.email, newOtp);
     }
     throw new AppError(404, 'User not found');
   }
 
-  public async requestPasswordReset(email: string) {
+  public async forgotPassword(email: string) {
     const user = await UserModel.findOne({ email });
 
     if (user === null) {
@@ -138,44 +144,45 @@ export class AuthService {
       throw new AppError(400, 'User not verified. Check your email for verification code or request for a new code.');
     }
 
-    const oldToken = await ResetTokenModel.findOne({ _id: user._id });
-    if (oldToken !== null) {
-      await oldToken.deleteOne();
-    }
-
-    const newToken = `${crypto.randomBytes(32).toString('hex')}${String(user._id)}`;
-    const hash = await argon2.hash(newToken);
-
-    await ResetTokenModel.create({
-      owner: user._id,
-      token: hash,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 20 * 60 * 1000
+    const newOtp: string = otpGenerator(4, {
+      digits: true,
+      lowerCaseAlphabets: true,
+      upperCaseAlphabets: true,
+      specialChars: false
     });
 
-    return { user, newToken };
+    let tokenExpiration: any = new Date();
+    tokenExpiration = tokenExpiration.setMinutes(tokenExpiration.getMinutes() + 20);
+
+    await OTPModel.create({ owner: user._id, code: newOtp, expiration: tokenExpiration });
+
+    return { user, newOtp };
   }
 
-  public async resetPassword(userId: string, password: string, token: string) {
-    const resetToken = await ResetTokenModel.findOne({ owner: userId, expiresAt: { $gt: Date.now() } });
+  public async resetPassword(userId: string, password: string, otp: string) {
+    const otpRecord = await OTPModel.findOne({ owner: userId });
+    const user = await UserModel.findOne({ _id: userId });
 
-    if (resetToken === null) {
-      throw new AppError(400, 'Invalid reset token or reset token has expired');
+    if (otpRecord === null) {
+      throw new AppError(404, 'User does not exist or OTP has expired');
     }
 
-    const isTokenValid = await resetToken.validateToken(token);
+    const isOtpValid = await otpRecord.validateOTP(otp);
 
-    if (!isTokenValid) {
-      throw new AppError(400, 'Invalid reset token or reset token has expired');
+    if (!isOtpValid) {
+      throw new AppError(400, 'Invalid OTP.');
     }
 
-    const user = await UserModel.findOne({ _id: resetToken.owner });
+    if (otpRecord.expiration < new Date(Date.now())) {
+      throw new AppError(400, 'OTP is expired. Request for another one.');
+    }
 
     if (user !== null) {
+      console.log(user);
       user.password = password;
 
       await user.save();
-      await ResetTokenModel.deleteOne({ owner: userId });
+      await OTPModel.deleteOne({ owner: userId });
 
       const message = passwordResetCompleteTemplate(user.name);
 

@@ -1,3 +1,4 @@
+import { AppError } from '../../utils';
 import StoreModel, { type Store } from '../store/store.model';
 import UserModel from '../user/user.model';
 import { type IStore } from './store.interface';
@@ -38,5 +39,15 @@ export class StoreService {
         $set: { verified: true }
       }
     );
+  }
+
+  public async searchStore(name: string) {
+    const products = await StoreModel.find({ businessName: { $regex: name, $options: 'i' } });
+
+    if (products.length === 0) {
+      throw new AppError(404, 'No store found for search term');
+    }
+
+    return products;
   }
 }

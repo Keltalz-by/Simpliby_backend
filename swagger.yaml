@@ -154,20 +154,13 @@ paths:
         '404':
           description: Not found
 
-  /auth/resetpassword/{token}:
+  /auth/resetpassword:
     patch:
       tags:
         - Auth
-      summary: Reset yourpassword
+      summary: Reset your password
       description: Reset your password
       operationId: resetPassword
-      parameters:
-        - name: token
-          in: path
-          description: Reset token
-          required: true
-          schema:
-            type: string
       requestBody:
         description: Reset password
         required: true
@@ -179,6 +172,10 @@ paths:
                 userId:
                   type: string
                 password:
+                  type: string
+                passwordConfirm:
+                  type: string
+                otp:
                   type: string
 
       responses:

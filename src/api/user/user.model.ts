@@ -1,14 +1,17 @@
-import { AppError } from '../../utils';
 import { type DocumentType, modelOptions, prop, Severity, pre, getModelForClass } from '@typegoose/typegoose';
 import argon2 from 'argon2';
+import { AppError } from '../../utils';
 
-@pre<User>('save', async function () {
+export const privateFields = ['__v', 'password', 'createdAt', 'updatedAt'];
+
+@pre<User>('save', async function (next) {
   if (!this.isModified('password')) {
     return;
   }
 
   const hash = await argon2.hash(this.password);
   this.password = hash;
+  next();
 })
 @modelOptions({
   schemaOptions: {

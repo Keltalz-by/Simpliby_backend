@@ -37,6 +37,9 @@ export class Store {
 
   @prop()
   public logo: object;
+
+  @prop({ default: false })
+  public verified: boolean;
 }
 
 const StoreModel = getModelForClass(Store);

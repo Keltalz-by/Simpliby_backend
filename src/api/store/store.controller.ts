@@ -3,7 +3,7 @@ import { AppError, logger } from '../../utils';
 import { StoreService } from './store.service';
 import { UserService } from '../user/user.service';
 // import { type Store } from './store.model';
-import { type CreateStoreInput } from './store.schema';
+import { type CreateStoreInput, type SearchStoreInput } from './store.schema';
 
 export class StoreController {
   public storeService = new StoreService();
@@ -63,6 +63,17 @@ export class StoreController {
       }
     } catch (err: any) {
       next(err);
+    }
+  };
+
+  public searchStore = async (req: Request<{}, {}, SearchStoreInput>, res: Response, next: NextFunction) => {
+    try {
+      const { name } = req.body;
+      const products = await this.storeService.searchStore(name);
+
+      return res.status(200).json({ success: true, data: products });
+    } catch (error: any) {
+      next(error);
     }
   };
 }

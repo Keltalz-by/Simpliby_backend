@@ -22,11 +22,7 @@ export class AuthRoute implements Routes {
     this.router.post(`${this.path}resendotp`, validateResource(resendOTPSchema), this.auth.resendOtp);
     this.router.get(`${this.path}refresh`, this.auth.refreshAccessToken);
     this.router.post(`${this.path}forgotpassword`, validateResource(forgotPasswordSchema), this.auth.forgotPassword);
-    this.router.patch(
-      `${this.path}resetpassword/:token`,
-      validateResource(resetPasswordSchema),
-      this.auth.resetPassword
-    );
+    this.router.patch(`${this.path}resetpassword`, validateResource(resetPasswordSchema), this.auth.resetPassword);
     this.router.use(deserializeUser, requireUser);
     this.router.get(`${this.path}logout`, this.auth.logoutUser);
   }

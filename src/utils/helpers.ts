@@ -1,6 +1,15 @@
 import otp from 'otp-generator';
 import fs from 'fs';
 import cloudinary from './cloudinary';
+import { type CookieOptions, type Response } from 'express';
+import { signJwt } from './jwt';
+import {
+  ACCESS_TOKEN_EXPIRESIN,
+  ACCESS_TOKEN_PRIVATE_KEY,
+  NODE_ENV,
+  REFRESH_TOKEN_EXPIRESIN,
+  REFRESH_TOKEN_PRIVATE_KEY
+} from '../config';
 
 interface IOptions {
   digits?: boolean;
@@ -8,6 +17,32 @@ interface IOptions {
   upperCaseAlphabets?: boolean;
   specialChars?: boolean;
 }
+
+export const accessTokenCookieOptions: CookieOptions = {
+  maxAge: 900000, // 15mins
+  httpOnly: true,
+  secure: NODE_ENV === 'production'
+};
+
+const refreshTokenCookieOptions: CookieOptions = {
+  maxAge: 3.154e10, // 1 year
+  httpOnly: true,
+  secure: NODE_ENV === 'production'
+};
+
+export const createToken = (res: Response, userId: string) => {
+  const accessToken = signJwt({ userId }, ACCESS_TOKEN_PRIVATE_KEY as string, {
+    expiresIn: ACCESS_TOKEN_EXPIRESIN
+  });
+
+  const refreshToken = signJwt({ userId }, REFRESH_TOKEN_PRIVATE_KEY as string, {
+    expiresIn: REFRESH_TOKEN_EXPIRESIN
+  });
+
+  res.cookie('accessToken', accessToken, accessTokenCookieOptions);
+  res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions);
+  res.cookie('loggedIn', true, accessTokenCookieOptions);
+};
 
 export function otpGenerator(length?: number, options?: IOptions) {
   return otp.generate(length, options);
@@ -32,7 +67,7 @@ export function verifyEmailTemplate(name: string, otp: string) {
                     <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Simpliby</a>
                 </div>
                 <p style="font-size:1.1em; font-weight: bold;">Hi, ${name}</p>
-                <p>Thank you for choosing Simpliby. Use the OTP to complete your registration. OTP is valid for 5 minutes.</p>
+                <p>Thank you for choosing Simpliby. Use the OTP to complete your registration. OTP is valid for 20 minutes.</p>
                 <h2 style="background: #00466a;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${otp}</h2>
                 <p style="font-size:0.9em;">Regards,<br />Simpliby</p>
             </div>
@@ -56,7 +91,7 @@ export function emailVerifiedTemplate(name: string) {
   `;
 }
 
-export function requestPasswordTemplate(name: string, url: string) {
+export function requestPasswordTemplate(name: string, otp: string) {
   return `
     <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
       <div style="margin:10px auto;width:90%;padding:5px 0">
@@ -64,9 +99,8 @@ export function requestPasswordTemplate(name: string, url: string) {
           <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Simpliby</a>
         </div>
         <p style="font-size:1.1em; font-weight: bold;">Hi, ${name}</p>
-        <p>Please use the url below to reset your password.</p>  
-        <p>This reset link is valid for only 20 minutes.</p>
-        <a href=${url} clicktracking=off>${url}</a>
+        <p>Thank you for choosing Simpliby. Enter the OTP to reset your password. OTP is valid for 20 minutes.</p>
+        <h2 style="background: #00466a;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${otp}</h2>
         <p style="font-size:0.9em;">Regards,<br />Simpliby</p>
       </div>
     </div>
