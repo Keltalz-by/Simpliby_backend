@@ -6,7 +6,7 @@ import { AuthRoute } from './api/auth/auth.route';
 import { StoreRoute } from './api/store/store.route';
 import { CategoryRoute } from './api/category/category.route';
 import { ProductRoute } from './api/product/product.route';
-// import { OrderRoute } from './api/order/order.route';
+import { OrderRoute } from './api/order/order.route';
 import { ToBuyRoute } from './api/toBuy/toBuy.route';
 import { CartRoute } from './api/cart/cart.route';
 import { connectDB } from './utils';
@@ -19,11 +19,11 @@ const authRoute = new AuthRoute();
 const storeRoute = new StoreRoute();
 const categoryRoute = new CategoryRoute();
 const productRoute = new ProductRoute();
-// const orderRoute = new OrderRoute();
+const orderRoute = new OrderRoute();
 const toBuyRoute = new ToBuyRoute();
 const cartRoute = new CartRoute();
 
-const app = new App([authRoute, cartRoute, toBuyRoute, storeRoute, userRoute, categoryRoute, productRoute]);
+const app = new App([authRoute, orderRoute, cartRoute, toBuyRoute, storeRoute, userRoute, categoryRoute, productRoute]);
 
 function connectToDatabase() {
   if (process.env.NODE_ENV !== 'production') {

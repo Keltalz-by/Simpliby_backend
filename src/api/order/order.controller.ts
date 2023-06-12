@@ -1,92 +1,105 @@
-// import { type NextFunction, type Request, type Response } from 'express';
-// import { OrderService } from './order.service';
-// import { type IOrder } from './order.interface';
-// import { Types } from 'mongoose';
-// import { AppError } from '../../utils';
+import { type NextFunction, type Request, type Response } from 'express';
+import { OrderService } from './order.service';
+import { Types } from 'mongoose';
+import { AppError } from '../../utils';
+import { type OrderInput } from './order.schema';
 
-// export class OrderController {
-//   public orderService = new OrderService();
+export class OrderController {
+  public orderService = new OrderService();
 
-//   public createOrder = async (req: Request<{}, {}, IOrder>, res: Response, next: NextFunction) => {
-//     try {
-//       const orderData = req.body;
-//       const userId = res.locals.user._id;
+  public createOrder = async (req: Request<{}, {}, OrderInput>, res: Response, next: NextFunction) => {
+    try {
+      const orderData = req.body;
+      const userId: string = res.locals.user._id;
 
-//       const order = await this.orderService.createOrder({ ...orderData, owner: userId });
+      const order = await this.orderService.createOrder({ ...orderData, owner: userId });
 
-//       return res.status(201).json({ success: true, data: order });
-//     } catch (err: any) {
-//       next(err);
-//     }
-//   };
+      return res.status(201).json({ success: true, data: order });
+    } catch (err: any) {
+      next(err);
+    }
+  };
 
-//   public getAllOrders = async (_req: Request, res: Response, next: NextFunction) => {
-//     try {
-//       const orders = await this.orderService.getOrders();
+  public getAllOrders = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const orders = await this.orderService.getOrders();
 
-//       return res.status(200).json({ success: true, count: orders.length, data: orders });
-//     } catch (error: any) {
-//       next(error);
-//     }
-//   };
+      return res.status(200).json({ success: true, count: orders.length, data: orders });
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//   public singleOrder = async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//       const { orderId } = req.params;
-//       const userId = res.locals.user._id;
+  public singleOrder = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { orderId } = req.params;
+      const userId = res.locals.user._id;
 
-//       if (!Types.ObjectId.isValid(orderId)) {
-//         next(new AppError(400, 'Invalid orderID'));
-//         return;
-//       }
+      if (!Types.ObjectId.isValid(orderId)) {
+        next(new AppError(400, 'Invalid orderID'));
+        return;
+      }
 
-//       const order = await this.orderService.getUserSingleOrder({ _id: orderId });
+      const order = await this.orderService.getUserSingleOrder({ _id: orderId });
 
-//       if (String(order.owner._id) !== String(userId)) {
-//         next(new AppError(403, 'This is not your order'));
-//         return;
-//       }
+      if (String(order.owner._id) !== String(userId)) {
+        next(new AppError(403, 'This is not your order'));
+        return;
+      }
 
-//       return res.status(200).json({ success: true, data: order });
-//     } catch (error: any) {
-//       next(error);
-//     }
-//   };
+      return res.status(200).json({ success: true, data: order });
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//   public userOrders = async (_req: Request, res: Response, next: NextFunction) => {
-//     try {
-//       const userId = res.locals.user._id;
+  public updateOrderStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { orderId } = req.params;
+      const { status } = req.body;
 
-//       const orders = await this.orderService.getAllOrdersOfUser({ owner: userId });
+      const order = await this.orderService.updateOrderStatus(orderId, status);
 
-//       return res.status(200).json({ success: true, count: orders.length, data: orders });
-//     } catch (error: any) {
-//       next(error);
-//     }
-//   };
+      res.status(200).json({ status: true, message: 'Order status updated successfully', data: order });
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//   public deleteUserOrder = async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//       const { orderId } = req.params;
-//       const userId = res.locals.user._id;
+  public userOrders = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = res.locals.user._id;
 
-//       if (!Types.ObjectId.isValid(orderId)) {
-//         next(new AppError(400, 'Invalid orderID'));
-//         return;
-//       }
+      const orders = await this.orderService.getAllOrdersOfUser({ owner: userId });
 
-//       const order = await this.orderService.getUserSingleOrder({ _id: orderId });
+      res.status(200).json({ success: true, count: orders.length, data: orders });
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//       if (String(order.owner._id) !== String(userId)) {
-//         next(new AppError(403, 'You cannot delete order'));
-//         return;
-//       }
+  public deleteUserOrder = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { orderId } = req.params;
+      const userId = res.locals.user._id;
 
-//       await this.orderService.deleteOrder(orderId);
+      if (!Types.ObjectId.isValid(orderId)) {
+        next(new AppError(400, 'Invalid orderID'));
+        return;
+      }
 
-//       return res.sendStatus(204);
-//     } catch (error: any) {
-//       next(error);
-//     }
-//   };
-// }
+      const order = await this.orderService.getUserSingleOrder({ _id: orderId });
+
+      if (String(order.owner._id) !== String(userId)) {
+        next(new AppError(403, 'You cannot delete order'));
+        return;
+      }
+
+      await this.orderService.deleteOrder(orderId);
+
+      return res.sendStatus(204);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+}

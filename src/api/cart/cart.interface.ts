@@ -7,10 +7,11 @@ interface CartItem {
   quantity: number;
 }
 
-export interface CartInterface {
+export interface ICart {
+  _id?: string;
   owner?: IUser['_id'];
-  cartItems: CartItem[];
-  totalPrice?: number;
+  items: CartItem[];
+  totalPrice: number;
 }
 
 export interface CartDataInterface {

@@ -1,16 +1,20 @@
-import { object, string, type TypeOf, number } from 'zod';
+import { object, string, type TypeOf } from 'zod';
 
 export const createOrderSchema = object({
   body: object({
-    orderItems: object({
-      product: string(),
-      quantity: number()
-    }).array(),
+    owner: string({
+      required_error: 'User ID is required'
+    }),
+    cart: string({
+      required_error: 'Cart ID is required'
+    }),
+    paymentMethod: string({
+      required_error: 'Payment Method is required'
+    }),
     phone: string().optional(),
     deliveryAddress: string().optional(),
     state: string().optional(),
-    country: string().optional(),
-    totalPrice: number().optional()
+    country: string().optional()
   })
 });
 

@@ -16,7 +16,7 @@ export class StoreController {
 
       const store = await this.storeService.createStore({ ...storeData, owner: userId });
 
-      return res.status(201).json({ message: 'Store created successfully.', success: true, data: store });
+      res.status(201).json({ success: true, message: 'Store created successfully.', data: store });
     } catch (err: any) {
       next(err);
     }
@@ -52,7 +52,7 @@ export class StoreController {
     }
   };
 
-  public findStore = async (req: Request, res: Response, next: NextFunction) => {
+  public findStore = async (req: Request, _res: Response, next: NextFunction) => {
     try {
       const storeId = req.params.storeId;
 
