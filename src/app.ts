@@ -12,7 +12,9 @@ import mongoSanitize from 'express-mongo-sanitize';
 import { type Routes } from './common';
 import { ErrorHandler, NotFoundError, limiter } from './middlewares';
 import { logger, stream } from './utils';
-import { NODE_ENV, PORT, SERVER_URL } from './config';
+import { NODE_ENV, PORT, SERVER_URL, ORIGIN, CREDENTIALS } from './config';
+
+const allowedOrigins = ORIGIN?.split(',').map((url) => url.trim());
 
 export class App {
   public app: express.Application;
@@ -48,8 +50,7 @@ export class App {
 
   private initializeMiddlewares() {
     this.app.use(morgan('dev', { stream }));
-    this.app.use(cors());
-    // this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
+    this.app.use(cors({ origin: allowedOrigins, credentials: CREDENTIALS }));
     this.app.use(helmet());
     this.app.use(hpp());
     this.app.use(compression());
