@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import { type Routes } from '@src/common';
 import { AuthController } from './auth.controller';
-import { deserializeUser, requireUser, validateResource } from '../../middlewares';
+import { isUser, validateResource } from '../../middlewares';
 import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from './auth.schema';
 import { verifySchema, resendOTPSchema } from '../otp/otp.schema';
 
@@ -23,7 +23,7 @@ export class AuthRoute implements Routes {
     this.router.get(`${this.path}refresh`, this.auth.refreshAccessToken);
     this.router.post(`${this.path}forgotpassword`, validateResource(forgotPasswordSchema), this.auth.forgotPassword);
     this.router.patch(`${this.path}resetpassword`, validateResource(resetPasswordSchema), this.auth.resetPassword);
-    this.router.use(deserializeUser, requireUser);
+    this.router.use(isUser);
     this.router.get(`${this.path}logout`, this.auth.logoutUser);
   }
 }

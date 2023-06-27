@@ -1,17 +1,63 @@
+import * as mongoose from 'mongoose';
 import { AppError } from '../../utils';
 import UserModel from '../user/user.model';
+import StoreModel from '../store/store.model';
 
 export class UserService {
-  public async findUserById(id: string) {
-    return await UserModel.findById(id);
-  }
-
-  public async findUserByEmail(email: string) {
-    return await UserModel.findOne({ email });
-  }
-
   public async findUser(option: object) {
     return await UserModel.findOne(option).select('-password -createdAt -updatedAt -__v');
+  }
+
+  public async followStore(userId: string, storeId: string) {
+    if (!mongoose.Types.ObjectId.isValid(storeId)) {
+      throw new AppError(400, 'Invalid store ID.');
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new AppError(400, 'Invalid user ID.');
+    }
+
+    const user = await UserModel.findOne({ _id: userId });
+    const store = await StoreModel.findOne({ _id: storeId });
+
+    if (user === null) {
+      throw new AppError(404, 'User not found');
+    }
+    if (store === null) {
+      throw new AppError(404, 'Store not found.');
+    }
+
+    if (!store.followers.includes(userId)) {
+      await store.updateOne({ $push: { followers: userId } });
+      await user.updateOne({ $push: { followings: storeId } });
+    }
+    throw new AppError(400, 'You have already followed this store');
+  }
+
+  public async unfollowStore(userId: string, storeId: string) {
+    if (!mongoose.Types.ObjectId.isValid(storeId)) {
+      throw new AppError(400, 'Invalid store ID.');
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new AppError(400, 'Invalid user ID.');
+    }
+
+    const user = await UserModel.findOne({ _id: userId });
+    const store = await StoreModel.findOne({ _id: storeId });
+
+    if (user === null) {
+      throw new AppError(404, 'User not found');
+    }
+    if (store === null) {
+      throw new AppError(404, 'Store not found.');
+    }
+
+    if (store.followers.includes(userId)) {
+      await store.updateOne({ $pull: { followers: userId } });
+      await user.updateOne({ $pull: { followings: storeId } });
+    }
+    throw new AppError(400, 'You do not follow store');
   }
 
   public async findAllUsers() {

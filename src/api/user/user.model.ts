@@ -33,7 +33,7 @@ export class User {
   public password: string;
 
   @prop({ default: false })
-  public verified: boolean;
+  public isEmailVerified: boolean;
 
   @prop()
   public phone: string;
@@ -43,6 +43,15 @@ export class User {
 
   @prop({ default: 'user' })
   public role: string;
+
+  @prop()
+  public occupation: string;
+
+  @prop({ default: [] })
+  public followers: string[];
+
+  @prop({ default: [] })
+  public followings: string[];
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {
     try {

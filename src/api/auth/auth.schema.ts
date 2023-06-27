@@ -10,7 +10,10 @@ export const registerSchema = object({
     }).email('Invalid email format'),
     password: string({
       required_error: 'Password is required'
-    }).min(6, 'Password length must be at least 6 characters'),
+    }).regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/, {
+      message:
+        'Password must be at least eight characters, with at least one upper case letter, one lower case letter, one number and one special character'
+    }),
     passwordConfirm: string({
       required_error: 'Password confirm is required'
     })
@@ -43,9 +46,6 @@ export const resetPasswordSchema = object({
   body: object({
     userId: string({
       required_error: 'User ID is required'
-    }),
-    otp: string({
-      required_error: 'OTP is required'
     }),
     password: string({
       required_error: 'Password is required'

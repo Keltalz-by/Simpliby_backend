@@ -23,7 +23,4 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 }
-}).fields([
-  { name: 'productImages', maxCount: 3 },
-  { name: 'productRackImage', maxCount: 1 }
-]);
+});

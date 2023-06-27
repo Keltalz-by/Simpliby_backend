@@ -48,6 +48,16 @@ export function otpGenerator(length?: number, options?: IOptions) {
   return otp.generate(length, options);
 }
 
+export const createOtp = (): string => {
+  const newOtp: string = otpGenerator(4, {
+    digits: true,
+    lowerCaseAlphabets: true,
+    upperCaseAlphabets: true,
+    specialChars: false
+  });
+  return newOtp;
+};
+
 export async function uploadToCloudinary(path: string, folderName: string) {
   const images = await cloudinary.uploader.upload(path, { folder: folderName });
   fs.unlinkSync(path);
@@ -85,6 +95,53 @@ export function emailVerifiedTemplate(name: string) {
         <p style="font-size:1.1em; font-weight: bold;">Hi, ${name}</p>
         <p>Your email has been verified successfully. Proceed to login.</p>
         <p>Thank you for choosing Simpliby.</p>
+        <p style="font-size:0.9em;">Regards,<br />Simpliby</p>
+      </div>
+    </div>
+  `;
+}
+
+export function emailVerifiedPasswordTemplate(name: string) {
+  return `
+    <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+      <div style="margin:10px auto;width:90%;padding:5px 0">
+        <div style="border-bottom:1px solid #eee">
+          <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Simpliby</a>
+        </div>
+        <p style="font-size:1.1em; font-weight: bold;">Hi, ${name}</p>
+        <p>Your email has been verified successfully. Proceed to change your password.</p>
+        <p>Thank you for choosing Simpliby.</p>
+        <p style="font-size:0.9em;">Regards,<br />Simpliby</p>
+      </div>
+    </div>
+  `;
+}
+
+export function storeEmailVerifiedTemplate(name: string) {
+  return `
+    <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+      <div style="margin:10px auto;width:90%;padding:5px 0">
+        <div style="border-bottom:1px solid #eee">
+          <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Simpliby</a>
+        </div>
+        <p style="font-size:1.1em; font-weight: bold;">Thank you for registering your store with us, ${name}</p>
+        <p>Your email has been verified successfully. Wait while we verify your store. This should take less than an hour.</p>
+        <p>Thank you for choosing Simpliby.</p>
+        <p style="font-size:0.9em;">Regards,<br />Simpliby</p>
+      </div>
+    </div>
+  `;
+}
+
+export function storeVerifiedTemplate(name: string) {
+  return `
+    <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+      <div style="margin:10px auto;width:90%;padding:5px 0">
+        <div style="border-bottom:1px solid #eee">
+          <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Simpliby</a>
+        </div>
+        <p style="font-size:1.1em; font-weight: bold;">Thank you for choosing us, ${name}</p>
+        <p>Your store has been verified successfully.</p>
         <p style="font-size:0.9em;">Regards,<br />Simpliby</p>
       </div>
     </div>

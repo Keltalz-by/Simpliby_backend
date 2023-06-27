@@ -6,7 +6,6 @@ import { UserService } from '../user/user.service';
 import { OTPService } from '../otp/otp.service';
 import { type ResendOTPInput, type OtpInput } from '../otp/otp.schema';
 import { type RegisterInput, type LoginInput, type ForgotPasswordInput, type ResetPasswordInput } from './auth.schema';
-import { type IRegister, type ILogin } from './auth.interface';
 import { privateFields } from '../user/user.model';
 
 const logout = (res: Response) => {
@@ -20,24 +19,24 @@ export class AuthController {
   public userService = new UserService();
   public otpService = new OTPService();
 
-  public registerUser = async (req: Request<RegisterInput>, res: Response, next: NextFunction) => {
+  public registerUser = async (req: Request<{}, {}, RegisterInput>, res: Response, next: NextFunction) => {
     try {
-      const userData: IRegister = req.body;
+      const userData = req.body;
       const user = await this.authService.signup(userData);
 
       res.status(201).json({
         success: true,
-        message: 'Check your email for verification code',
-        userId: user._id
+        message: 'User created successfully. Check your email for verification code',
+        data: user._id
       });
     } catch (error: any) {
       next(error);
     }
   };
 
-  public loginUser = async (req: Request<LoginInput>, res: Response, next: NextFunction) => {
+  public loginUser = async (req: Request<{}, {}, LoginInput>, res: Response, next: NextFunction) => {
     try {
-      const userData: ILogin = req.body;
+      const userData = req.body;
       const user = await this.authService.login(userData);
 
       createToken(res, JSON.stringify(user._id));
@@ -60,15 +59,15 @@ export class AuthController {
     }
   };
 
-  public verifyEmail = async (req: Request<OtpInput>, res: Response, next: NextFunction) => {
+  public verifyEmail = async (req: Request<{}, {}, OtpInput>, res: Response, next: NextFunction) => {
     try {
       const { userId, otp } = req.body;
 
       await this.authService.verifyEmail(userId, otp);
 
-      return res.status(200).json({ success: true, message: 'User verified successfully. Proceed to login.' });
-    } catch (err) {
-      next(err);
+      res.status(200).json({ success: true, message: 'User verified successfully.' });
+    } catch (error) {
+      next(error);
     }
   };
 
@@ -86,21 +85,19 @@ export class AuthController {
     }
   };
 
-  public resendOtp = async (req: Request<ResendOTPInput>, res: Response, next: NextFunction) => {
+  public resendOtp = async (req: Request<{}, {}, ResendOTPInput>, res: Response, next: NextFunction) => {
     try {
       const { userId, email } = req.body;
 
       await this.authService.resendOtp(userId, email);
 
-      return res
-        .status(200)
-        .json({ success: true, message: 'OTP resent successfully. Check your email for the new OTP.' });
+      res.status(200).json({ success: true, message: 'OTP resent successfully. Check your email for the new OTP.' });
     } catch (err: any) {
       next(err);
     }
   };
 
-  public forgotPassword = async (req: Request<ForgotPasswordInput>, res: Response, next: NextFunction) => {
+  public forgotPassword = async (req: Request<{}, {}, ForgotPasswordInput>, res: Response, next: NextFunction) => {
     try {
       const { email } = req.body;
       const { user, newOtp } = await this.authService.forgotPassword(email);
@@ -114,11 +111,11 @@ export class AuthController {
     }
   };
 
-  public resetPassword = async (req: Request<ResetPasswordInput>, res: Response, next: NextFunction) => {
+  public resetPassword = async (req: Request<{}, {}, ResetPasswordInput>, res: Response, next: NextFunction) => {
     try {
-      const { userId, password, otp } = req.body;
+      const { userId, password } = req.body;
 
-      await this.authService.resetPassword(userId, password, otp);
+      await this.authService.resetPassword(userId, password);
 
       res.status(200).json({ success: true, message: 'Password reset successful. Procees to login.' });
     } catch (error: any) {

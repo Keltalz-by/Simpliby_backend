@@ -13,7 +13,11 @@ export {
   passwordResetCompleteTemplate,
   uploadToCloudinary,
   createToken,
-  accessTokenCookieOptions
+  accessTokenCookieOptions,
+  createOtp,
+  storeEmailVerifiedTemplate,
+  storeVerifiedTemplate,
+  emailVerifiedPasswordTemplate
 } from './helpers';
 export { sendOtpVerificationMail } from './sendOtpVerificationMail';
 export { signJwt, verifyJwt } from './jwt';

@@ -27,6 +27,30 @@ export class UserController {
     }
   };
 
+  public followStore = async (req: Request<{ storeId: string }, {}, {}>, res: Response, next: NextFunction) => {
+    try {
+      const { storeId } = req.params;
+      const userId = res.locals.user._id;
+
+      await this.userService.followStore(userId, storeId);
+      res.status(200).json({ status: true, message: 'Store followed successfully' });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  public unfollowStore = async (req: Request<{ storeId: string }, {}, {}>, res: Response, next: NextFunction) => {
+    try {
+      const { storeId } = req.params;
+      const userId = res.locals.user._id;
+
+      await this.userService.unfollowStore(userId, storeId);
+      res.status(200).json({ status: true, message: 'Store unfollowed successfully' });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
   public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { userId } = req.params;

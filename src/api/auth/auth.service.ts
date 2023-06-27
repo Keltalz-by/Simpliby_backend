@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable @typescript-eslint/no-confusing-void-expression */
+import * as mongoose from 'mongoose';
 import { ACCESS_TOKEN_EXPIRESIN, ACCESS_TOKEN_PRIVATE_KEY, REFRESH_TOKEN_PUBLIC_KEY } from '../../config';
 import UserModel from '../user/user.model';
 import {
   AppError,
+  createOtp,
+  emailVerifiedPasswordTemplate,
   emailVerifiedTemplate,
   otpGenerator,
   passwordResetCompleteTemplate,
@@ -15,29 +18,30 @@ import {
 import OTPModel from '../otp/otp.model';
 import { type IRegister, type ILogin } from './auth.interface';
 import { UserService } from '../user/user.service';
+import { type IUser } from '../user/user.interface';
 
 export class AuthService {
   public userService = new UserService();
 
-  public async signup(userData: IRegister) {
+  public async signup(userData: IRegister): Promise<IUser> {
     const user = await UserModel.findOne({ email: userData.email });
 
     if (user !== null) {
       throw new AppError(409, `User ${user.email} already exist`);
     }
 
-    const newOtp: string = otpGenerator(4, {
-      digits: true,
-      lowerCaseAlphabets: true,
-      upperCaseAlphabets: true,
-      specialChars: false
-    });
+    const newOtp: string = createOtp();
 
     let tokenExpiration: any = new Date();
     tokenExpiration = tokenExpiration.setMinutes(tokenExpiration.getMinutes() + 20);
 
     const newUser = await UserModel.create(userData);
-    await OTPModel.create({ owner: newUser._id, code: newOtp, expiration: tokenExpiration });
+    await OTPModel.create({
+      owner: newUser._id,
+      code: newOtp,
+      expiration: tokenExpiration,
+      type: 'Email Verification'
+    });
     await sendOtpVerificationMail(newUser.name, newUser.email, newOtp);
 
     return newUser;
@@ -56,7 +60,7 @@ export class AuthService {
       throw new AppError(400, 'Invalid email or password');
     }
 
-    if (!user.verified) {
+    if (!user.isEmailVerified) {
       throw new AppError(400, 'Please verify your email');
     }
 
@@ -64,11 +68,20 @@ export class AuthService {
   }
 
   public async verifyEmail(userId: string, otp: string) {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new AppError(400, 'Invalid user ID.');
+    }
+
     const otpRecord = await OTPModel.findOne({ owner: userId });
     const user = await UserModel.findOne({ _id: userId });
 
     if (otpRecord === null) {
-      throw new AppError(400, 'User does not exists or has been verified or OTP has expired');
+      throw new AppError(400, 'User does not exists or user has been verified or OTP has expired');
+    }
+
+    if (otpRecord.expiration < new Date(Date.now())) {
+      await OTPModel.deleteOne({ owner: userId });
+      throw new AppError(400, 'OTP is expired. Request for another one.');
     }
 
     const isOtpValid = await otpRecord.validateOTP(otp);
@@ -77,16 +90,19 @@ export class AuthService {
       throw new AppError(400, 'Invalid OTP.');
     }
 
-    if (otpRecord.expiration < new Date(Date.now())) {
-      throw new AppError(400, 'OTP is expired. Request for another one.');
+    if (otpRecord.type === 'Email Verification') {
+      await UserModel.updateOne({ _id: userId }, { $set: { isEmailVerified: true } });
+      const message = emailVerifiedTemplate(user?.name as string);
+      await OTPModel.deleteOne({ owner: userId });
+      return await sendMail(user?.email as string, 'Email Verification Successful', message);
+    } else if (otpRecord.type === 'Password Verification') {
+      await UserModel.updateOne({ _id: userId }, { $set: { password: '' } });
+      const message = emailVerifiedPasswordTemplate(user?.name as string);
+      await OTPModel.deleteOne({ owner: userId });
+      return await sendMail(user?.email as string, 'Email Verification Successful', message);
+    } else {
+      throw new AppError(400, 'Invalid OTP Type.');
     }
-
-    await UserModel.updateOne({ _id: userId }, { $set: { verified: true } });
-    await OTPModel.deleteOne({ owner: userId });
-
-    const message = emailVerifiedTemplate(user?.name as string);
-
-    return await sendMail(user?.email as string, 'Email Verification Successful', message);
   }
 
   public async refreshAccessToken(refreshToken: string) {
@@ -111,18 +127,13 @@ export class AuthService {
     const user = await UserModel.findOne({ email });
 
     if (user !== null && String(user._id) === userId) {
-      if (user.verified) {
+      if (user.isEmailVerified) {
         throw new AppError(400, 'User already verified');
       }
 
       await OTPModel.deleteOne({ owner: userId });
 
-      const newOtp: string = otpGenerator(4, {
-        digits: true,
-        lowerCaseAlphabets: true,
-        upperCaseAlphabets: true,
-        specialChars: false
-      });
+      const newOtp: string = createOtp();
 
       let tokenExpiration: any = new Date();
       tokenExpiration = tokenExpiration.setMinutes(tokenExpiration.getMinutes() + 20);
@@ -140,7 +151,7 @@ export class AuthService {
       throw new AppError(404, 'User does not exist');
     }
 
-    if (!user.verified) {
+    if (!user.isEmailVerified) {
       throw new AppError(400, 'User not verified. Check your email for verification code or request for a new code.');
     }
 
@@ -154,35 +165,24 @@ export class AuthService {
     let tokenExpiration: any = new Date();
     tokenExpiration = tokenExpiration.setMinutes(tokenExpiration.getMinutes() + 20);
 
-    await OTPModel.create({ owner: user._id, code: newOtp, expiration: tokenExpiration });
+    await OTPModel.create({
+      owner: user._id,
+      code: newOtp,
+      expiration: tokenExpiration,
+      type: 'Password Verification'
+    });
 
     return { user, newOtp };
   }
 
-  public async resetPassword(userId: string, password: string, otp: string) {
-    const otpRecord = await OTPModel.findOne({ owner: userId });
+  public async resetPassword(userId: string, password: string) {
     const user = await UserModel.findOne({ _id: userId });
-
-    if (otpRecord === null) {
-      throw new AppError(404, 'User does not exist or OTP has expired');
-    }
-
-    const isOtpValid = await otpRecord.validateOTP(otp);
-
-    if (!isOtpValid) {
-      throw new AppError(400, 'Invalid OTP.');
-    }
-
-    if (otpRecord.expiration < new Date(Date.now())) {
-      throw new AppError(400, 'OTP is expired. Request for another one.');
-    }
 
     if (user !== null) {
       console.log(user);
       user.password = password;
 
       await user.save();
-      await OTPModel.deleteOne({ owner: userId });
 
       const message = passwordResetCompleteTemplate(user.name);
 

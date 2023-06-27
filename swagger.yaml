@@ -1,8 +1,6 @@
 tags:
   - name: Auth
-    description: Everything about authentication
-  - name: User
-    description: Everything about managing users
+    description: Everything about managing buyers
   - name: Store
     description: Everything about creating and owning a store
   - name: Product
@@ -69,6 +67,8 @@ paths:
           description: Successful operation
         '400':
           description: Bad request
+        '500':
+          description: Internal server error
 
   /auth/resendotp:
     post:
@@ -94,6 +94,8 @@ paths:
           description: Successful operation
         '400':
           description: Bad request
+        '500':
+          description: Interal server error
 
   /auth/login:
     post:
@@ -114,6 +116,8 @@ paths:
           description: Successful operation
         '400':
           description: Bad request
+        '500':
+          description: Internal server error
 
   /auth/refresh:
     get:
@@ -153,6 +157,8 @@ paths:
           description: Bad request
         '404':
           description: Not found
+        '500':
+          description: Internal server error
 
   /auth/resetpassword:
     patch:
@@ -175,14 +181,14 @@ paths:
                   type: string
                 passwordConfirm:
                   type: string
-                otp:
-                  type: string
 
       responses:
         '200':
           description: Successful operation
         '400':
           description: Bad request
+        '500':
+          description: Internal server error
 
   /auth/logout:
     get:
@@ -410,6 +416,10 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+
+ #################
+  # Buyer API #
+  #################
 
   /users:
     get:
