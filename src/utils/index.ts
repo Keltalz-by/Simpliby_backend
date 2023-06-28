@@ -15,7 +15,6 @@ export {
   createToken,
   accessTokenCookieOptions,
   createOtp,
-  storeEmailVerifiedTemplate,
   storeVerifiedTemplate,
   emailVerifiedPasswordTemplate
 } from './helpers';

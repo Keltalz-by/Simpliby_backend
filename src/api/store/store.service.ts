@@ -1,44 +1,146 @@
-import { AppError } from '../../utils';
-import StoreModel, { type Store } from '../store/store.model';
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
+import * as mongoose from 'mongoose';
+import { AppError, sendMail, storeVerifiedTemplate } from '../../utils';
+import StoreModel from '../store/store.model';
+import { type ICreateStore, type IStore, type IUpdateStore } from './store.interface';
 import UserModel from '../user/user.model';
-import { type IStore } from './store.interface';
 
 export class StoreService {
-  public async createStore(storeData: IStore): Promise<Store> {
-    const store = await (await StoreModel.create(storeData)).populate('owner', 'name');
-
-    const user = await UserModel.findOne({ _id: store.owner._id });
-
-    if (user?.role !== 'seller') {
-      await user?.updateOne({ $set: { role: 'seller' } });
+  public async createStore(storeData: ICreateStore): Promise<IStore> {
+    if (!mongoose.Types.ObjectId.isValid(storeData.owner)) {
+      throw new AppError(400, 'Invalid user ID.');
     }
 
-    return store;
+    const user = await UserModel.findOne({ _id: storeData.owner });
+    const store = await StoreModel.findOne({ businessName: storeData.businessName });
+
+    if (user === null) {
+      throw new AppError(404, `User with ID ${storeData.owner} does not exist`);
+    }
+
+    if (store !== null) {
+      throw new AppError(409, `Store with business name ${storeData.businessName} already exist`);
+    }
+
+    const newStore = await (await StoreModel.create(storeData)).populate('owner', 'name');
+
+    if (user.role !== 'seller') {
+      await user.updateOne({ $set: { role: 'seller' } });
+    }
+
+    return newStore;
   }
 
-  public async updateStore(storeId: string, options: object) {
-    return await StoreModel.updateOne({ _id: storeId }, { $set: options });
+  public async verifyStore(storeId: string) {
+    if (!mongoose.Types.ObjectId.isValid(storeId)) {
+      throw new AppError(400, 'Invalid store ID.');
+    }
+    const store = await StoreModel.findOne({ _id: storeId });
+
+    if (store === null) {
+      throw new AppError(404, 'Store not found.');
+    }
+
+    const user = await UserModel.findOne({ _id: store.owner });
+
+    if (user === null) {
+      throw new AppError(404, 'User not found.');
+    }
+
+    if (store.isStoreVerified) {
+      throw new AppError(400, 'Store already verified.');
+    }
+
+    await StoreModel.updateOne(
+      { _id: storeId },
+      {
+        $set: { isStoreVerified: true }
+      }
+    );
+
+    const message = storeVerifiedTemplate(store.businessName);
+    return await sendMail(user.email, 'Store Verification Successful', message);
+  }
+
+  public async followUser(userId: string, storeId: string) {
+    if (!mongoose.Types.ObjectId.isValid(storeId)) {
+      throw new AppError(400, 'Invalid store ID.');
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new AppError(400, 'Invalid user ID.');
+    }
+
+    const user = await UserModel.findOne({ _id: userId });
+    const store = await StoreModel.findOne({ _id: storeId });
+
+    if (user === null) {
+      throw new AppError(404, 'User not found');
+    }
+    if (store === null) {
+      throw new AppError(404, 'Store not found.');
+    }
+
+    if (!user.followers.includes(storeId)) {
+      await user.updateOne({ $push: { followers: storeId } });
+      return await store.updateOne({ $push: { followings: userId } });
+    }
+    throw new AppError(400, 'You have already followed this user');
+  }
+
+  public async unfollowUser(userId: string, storeId: string) {
+    if (!mongoose.Types.ObjectId.isValid(storeId)) {
+      throw new AppError(400, 'Invalid store ID.');
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new AppError(400, 'Invalid user ID.');
+    }
+
+    const user = await UserModel.findOne({ _id: userId });
+    const store = await StoreModel.findOne({ _id: storeId });
+
+    if (user === null) {
+      throw new AppError(404, 'User not found');
+    }
+    if (store === null) {
+      throw new AppError(404, 'Store not found.');
+    }
+
+    if (user.followers.includes(storeId)) {
+      await user.updateOne({ $pull: { followers: storeId } });
+      return await store.updateOne({ $pull: { followings: userId } });
+    }
+    throw new AppError(400, 'You do not follow user');
+  }
+
+  public async updateStore(storeData: IUpdateStore) {
+    if (!mongoose.Types.ObjectId.isValid(storeData.storeId)) {
+      throw new AppError(400, 'Invalid store ID.');
+    }
+
+    return await StoreModel.updateOne({ _id: storeData.storeId }, { $set: storeData });
   }
 
   public async findStore(option: object) {
     return await StoreModel.findOne(option);
   }
 
-  public async findStoreById(id: string) {
-    return await StoreModel.findById(id).orFail().exec();
+  public async findStoreById(storeId: string) {
+    if (!mongoose.Types.ObjectId.isValid(storeId)) {
+      throw new AppError(400, 'Invalid store ID.');
+    }
+
+    const store = await StoreModel.findOne({ _id: storeId });
+
+    if (store === null) {
+      throw new AppError(404, 'Store not found.');
+    }
+    return store;
   }
 
   public async findAllStores() {
     return await StoreModel.find({}).orFail().exec();
-  }
-
-  public async verifyStore(storeId: string) {
-    return await StoreModel.updateOne(
-      { _id: storeId },
-      {
-        $set: { verified: true }
-      }
-    );
   }
 
   public async searchStore(name: string) {

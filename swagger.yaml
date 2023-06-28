@@ -209,17 +209,17 @@ paths:
   # Store API #
   #################
 
-  /stores/auth/create:
+  /stores:
     post:
       tags:
         - Store
       summary: Create a new store
-      description: A seller can create a new store
+      description: A user can create a new store
       operationId: createStore
       requestBody:
         description: Create a new store
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/CreateStore'
       responses:
@@ -229,50 +229,6 @@ paths:
           description: Bad request
         '409':
           description: Duplicate error
-        '500':
-          description: Internal server error
-
-  /stores/auth/verifyemail:
-    patch:
-      tags:
-        - Store
-      summary: Verify email used for registration
-      description: A store user can verify email that was used for registration
-      operationId: verifyStoreEmail
-      requestBody:
-        description: Verify store email
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VerifyStoreEmail'
-      responses:
-        '200':
-          description: Successful operation
-        '400':
-          description: Bad request
-        '500':
-          description: Internal server error
-
-  /stores/auth/login:
-    post:
-      tags:
-        - Store
-      summary: Store user login
-      description: A store user can login with email and password
-      operationId: loginStore
-      requestBody:
-        description: Login with email and password
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginStore'
-      responses:
-        '200':
-          description: Successful operation
-        '400':
-          description: Bad request
-        '404':
-          description: Not found
         '500':
           description: Internal server error
 
@@ -707,56 +663,40 @@ components:
           example: 12345678
     CreateStore:
       required:
-        - fullName
         - businessName
-        - email
         - businessLocation
-        - password
-        - passwordConfirm
+        - description
+        - address
+        - city
+        - country
+        - storeImage
+        - logo
       type: object
       properties:
-        fullName:
-          type: string
-          example: Jane Bull
         businessName:
           type: string
           example: Janee Clothings
-        email:
-          type: string
-          example: janeeclothings@gmail.com
         businessLocation:
           type: string
           example: Kano, Nigeria
-        password:
+        description:
           type: string
-          example: 1Ax4@h55J
-        passwordConfirm:
+          example: We sell good and quality clothings
+        address:
           type: string
-          example: 1Ax4@h55J
-    VerifyStoreEmail:
-      required:
-        - storeId
-        - otp
-      type: object
-      properties:
-        storeId:
+          example: 12, Alhaji Ajase street
+        city:
           type: string
-          example: 6476f19928ovb6637824Hj84
-        otp:
+          example: Kano
+        country:
           type: string
-          example: 2Ed0
-    LoginStore:
-      required:
-        - email
-        - password
-      type: object
-      properties:
-        email:
+          example: Nigeria
+        storeImage:
           type: string
-          example: janeeclothings@gmail.com
-        password:
+          format: binary
+        logo:
           type: string
-          example: 1Ax4@h55J
+          format: binary
     UpdateStore:
       required:
         - description
@@ -779,12 +719,9 @@ components:
         country:
           type: string
           example: Nigeria
-        storeImages:
-          type: array
-          description: A maximum of 2 images can be uploaded
-          items:
-            type: string
-            format: binary
+        storeImage:
+          type: string
+          format: binary
         logo:
           type: string
           format: binary

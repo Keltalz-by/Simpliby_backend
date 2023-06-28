@@ -23,7 +23,10 @@ export const {
   LOCAL_SERVER_URL,
   CLOUD_NAME,
   API_KEY,
-  API_SECRET
+  API_SECRET,
+  PAYSTACK_SECRET_KEY,
+  PAYSTACK_PUBLIC_KEY,
+  PAYSTACK_INITIALIZE_URL
 } = process.env;
 
 export const CREDENTIALS = process.env.CREDENTIALS === 'true';

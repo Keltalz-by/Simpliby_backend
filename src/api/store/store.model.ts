@@ -1,4 +1,5 @@
-import { Ref, Severity, getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
+import { Severity, getModelForClass, modelOptions, prop, Ref } from '@typegoose/typegoose';
+import { IGallery } from '../../common';
 import { type User } from '../user/user.model';
 
 @modelOptions({
@@ -11,35 +12,62 @@ import { type User } from '../user/user.model';
   }
 })
 export class Store {
-  @prop({ ref: 'User', required: true })
+  @prop({ ref: 'User', type: () => String, required: true })
   public owner: Ref<User>;
 
-  @prop({ required: true })
+  @prop({ required: true, unique: true })
   public businessName: string;
 
   @prop({ required: true })
-  public location: string;
+  public businessLocation: string;
 
-  @prop({ required: true })
+  @prop()
+  public phone: string;
+
+  @prop()
   public description: string;
 
-  @prop({ required: true })
+  @prop()
   public address: string;
 
-  @prop({ required: true })
+  @prop()
   public city: string;
 
-  @prop({ required: true, default: 'Nigeria' })
+  @prop({ default: 'Nigeria' })
   public country: string;
 
   @prop()
-  public storeImages: object[];
+  public storeImage: IGallery;
 
   @prop()
-  public logo: object;
+  public logo: IGallery;
+
+  @prop()
+  public website: string;
+
+  @prop()
+  public businessHours: string;
+
+  @prop({ default: [] })
+  public followers: string[];
+
+  @prop({ default: [] })
+  public followings: string[];
 
   @prop({ default: false })
-  public verified: boolean;
+  public isStoreVerified: boolean;
+
+  @prop({ default: 0 })
+  public balance: number;
+
+  @prop({ default: 0 })
+  public amountWithdrawn: number;
+
+  @prop({ default: 'FREE' })
+  public plan: string;
+
+  @prop({ default: [] })
+  public buyersVisited: string[];
 }
 
 const StoreModel = getModelForClass(Store);
