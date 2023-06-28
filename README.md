@@ -1,2 +1,2 @@
 # Simplibuy
-This is the documentation for Simplibuy e-commerce store.
+This is the documentation for Simpliby e-commerce store.
