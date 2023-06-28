@@ -18,4 +18,18 @@ export const createOrderSchema = object({
   })
 });
 
+export const orderPaymentRequest = object({
+  params: object({
+    orderId: string({
+      required_error: 'Order ID is required'
+    })
+  }),
+  body: object({
+    email: string({
+      required_error: 'Email is required'
+    })
+  })
+});
+
 export type OrderInput = TypeOf<typeof createOrderSchema>['body'];
+export type OrderPaymentRequestInput = TypeOf<typeof orderPaymentRequest>;

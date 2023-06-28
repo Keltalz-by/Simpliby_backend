@@ -3,6 +3,11 @@ import { modelOptions, pre, prop, Severity, getModelForClass, Ref, type Document
 import argon2 from 'argon2';
 import { User } from '../user/user.model';
 
+enum Type {
+  EmailVerification = 'Email Verification',
+  PasswordVerification = 'Password Verification'
+}
+
 @pre<OTP>('save', async function () {
   if (!this.isModified('code')) {
     return;
@@ -29,6 +34,9 @@ export class OTP {
 
   @prop({ default: null })
   public expiration: Date;
+
+  @prop({ enum: Type })
+  public type: Type;
 
   async validateOTP(this: DocumentType<OTP>, code: string) {
     try {

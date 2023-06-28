@@ -1,13 +1,10 @@
-import { modelOptions, prop, Severity, getModelForClass, Ref } from '@typegoose/typegoose';
+import { modelOptions, prop, getModelForClass, Ref } from '@typegoose/typegoose';
 import { type User } from '../user/user.model';
 
 @modelOptions({
   schemaOptions: {
     collection: 'cart',
     timestamps: true
-  },
-  options: {
-    allowMixed: Severity.ALLOW
   }
 })
 class CartItem {

@@ -1,12 +1,12 @@
-import { type Document, type Model, type model } from 'mongoose';
+import { type Model } from 'mongoose';
 
-export type QueryObj = Record<string, string>;
+export type QueryObj = Record<string, any>;
 
 export class APIFeatures {
-  public query: Model<Document<{}, {}, {}>, typeof model>;
+  public query: Model<any>;
   public queryString: QueryObj;
 
-  constructor(query: Model<Document<{}, {}, {}>, typeof model>, queryString: QueryObj) {
+  constructor(query: Model<any>, queryString: QueryObj) {
     this.query = query;
     this.queryString = queryString;
 

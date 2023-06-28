@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { type NextFunction, type Request, type Response } from 'express';
 import { OrderService } from './order.service';
 import { Types } from 'mongoose';
@@ -11,6 +12,11 @@ export class OrderController {
     try {
       const orderData = req.body;
       const userId: string = res.locals.user._id;
+
+      if (orderData.owner !== userId.toString()) {
+        next(new AppError(403, 'You cannot create the order'));
+        return;
+      }
 
       const order = await this.orderService.createOrder({ ...orderData, owner: userId });
 
@@ -98,6 +104,17 @@ export class OrderController {
       await this.orderService.deleteOrder(orderId);
 
       return res.sendStatus(204);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  public getProductIdsFromOrder = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { orderId } = req.params;
+      const productIds = await this.orderService.getProductIds(orderId);
+
+      res.status(200).json({ status: true, message: 'Product IDs gotten successfully', data: productIds });
     } catch (error: any) {
       next(error);
     }

@@ -1,9 +1,10 @@
+import { Types } from 'mongoose';
 import OrderModel, { type Order } from './order.model';
 import { type IOrder } from './order.interface';
 import { AppError } from '../../utils';
 // import ProductModel from '../product/product.model';
-import { Types } from 'mongoose';
 import CartModel from '../cart/cart.model';
+import ProductModel from '../product/product.model';
 
 export class OrderService {
   public async createOrder(orderData: IOrder): Promise<Order> {
@@ -48,6 +49,33 @@ export class OrderService {
     //   return await (
     //     await OrderModel.create({ ...orderData, orderItems: allOrderItemIds, totalPrice })
     //   ).populate('owner', 'name');
+  }
+
+  public async getProductIds(orderId: string) {
+    const order = await OrderModel.findOne({ _id: orderId });
+
+    if (order === null) {
+      throw new AppError(404, 'Order not found');
+    }
+    const cart = await CartModel.findOne({ _id: order.cart });
+    if (cart === null) {
+      throw new AppError(404, 'Cart not found');
+    }
+    const productIds = cart.items.map((item) => item.product);
+    // const storeInfo = {};
+
+    const store = Promise.all(
+      productIds.map(async (id) => {
+        const product = await ProductModel.findOne({ _id: id });
+        if (product === null) {
+          throw new AppError(404, 'Product not found');
+        }
+        const storeId = String(product.storeId);
+        const productPrice = product.price;
+        return { storeId, productPrice };
+      })
+    );
+    return await store;
   }
 
   public async getOrders(): Promise<Order[]> {

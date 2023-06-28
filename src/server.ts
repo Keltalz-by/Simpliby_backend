@@ -10,7 +10,6 @@ import { OrderRoute } from './api/order/order.route';
 import { ToBuyRoute } from './api/toBuy/toBuy.route';
 import { CartRoute } from './api/cart/cart.route';
 import { connectDB } from './utils';
-import { SubscriptionRoute } from './api/subscription/subscription.route';
 require('dotenv').config();
 
 ValidateEnv();
@@ -23,19 +22,8 @@ const productRoute = new ProductRoute();
 const orderRoute = new OrderRoute();
 const toBuyRoute = new ToBuyRoute();
 const cartRoute = new CartRoute();
-const subscriptionRoute = new SubscriptionRoute();
 
-const app = new App([
-  authRoute,
-  storeRoute,
-  subscriptionRoute,
-  orderRoute,
-  cartRoute,
-  toBuyRoute,
-  userRoute,
-  categoryRoute,
-  productRoute
-]);
+const app = new App([authRoute, storeRoute, orderRoute, cartRoute, toBuyRoute, userRoute, categoryRoute, productRoute]);
 
 function connectToDatabase() {
   if (process.env.NODE_ENV !== 'production') {

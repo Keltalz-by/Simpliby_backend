@@ -12,9 +12,9 @@ enum Status {
 }
 
 enum PaymentMethod {
-  CashOnDelivery = 'Cash On Delivery',
+  PayOnDelivery = 'Pay On Delivery',
   PayWithCard = 'Pay With Card',
-  StorePickup = 'Store Pickup'
+  StorePickup = 'Reserve'
 }
 @modelOptions({
   schemaOptions: {
@@ -50,8 +50,8 @@ export class Order {
   @prop({ default: 'Nigeria' })
   public country?: string;
 
-  @prop()
-  public totalPrice?: number;
+  @prop({ default: 0 })
+  public totalPrice: number;
 }
 
 const OrderModel = getModelForClass(Order);
