@@ -68,9 +68,16 @@ export class StoreController {
   public followUser = async (req: Request<{ userId: string }, {}, {}>, res: Response, next: NextFunction) => {
     try {
       const { userId } = req.params;
-      const storeId = res.locals.store._id;
+      const user = res.locals.user;
 
-      await this.storeService.followUser(userId, storeId);
+      const store = await this.storeService.findStore({ owner: user._id });
+
+      if (store === null) {
+        next(new AppError(404, 'Store not found'));
+        return;
+      }
+
+      await this.storeService.followUser(userId, String(store._id));
       res.status(200).json({ status: true, message: 'User followed successfully' });
     } catch (error: any) {
       next(error);

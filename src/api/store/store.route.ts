@@ -29,9 +29,10 @@ export class StoreRoute implements Routes {
       validateResource(createStoreSchema),
       this.store.createStore
     );
+    this.router.use(restrictUser('seller'));
+    this.router.patch(`${this.path}:userId/follow`, this.store.followUser);
     this.router.use(restrictUser('admin'));
     this.router.patch(`${this.path}verifystore/:storeId`, validateResource(verifyStoreSchema), this.store.verifyStore);
-    this.router.patch(`${this.path}:userId/follow`, this.store.followUser);
     this.router.patch(`${this.path}:userId/unfollow`, this.store.unfollowUser);
     this.router.patch(
       `${this.path}update`,
