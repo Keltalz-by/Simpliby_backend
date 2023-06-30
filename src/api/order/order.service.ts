@@ -125,14 +125,14 @@ export class OrderService {
     return order;
   }
 
-  public async deleteOrder(orderId: string) {
-    //     const order = await OrderModel.findOne({ _id: orderId });
-    //     if (order !== null) {
-    //       order.orderItems.map(async (item) => {
-    //         await OrderItemModel.findByIdAndRemove(item);
-    //       });
-    //       return await order?.deleteOne();
-    //     }
-    //     throw new AppError(404, 'Order not found');
-  }
+  // public async deleteOrder(orderId: string) {
+  //   //     const order = await OrderModel.findOne({ _id: orderId });
+  //   //     if (order !== null) {
+  //   //       order.orderItems.map(async (item) => {
+  //   //         await OrderItemModel.findByIdAndRemove(item);
+  //   //       });
+  //   //       return await order?.deleteOne();
+  //   //     }
+  //   //     throw new AppError(404, 'Order not found');
+  // }
 }

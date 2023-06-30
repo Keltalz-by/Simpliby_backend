@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { type NextFunction, type Request, type Response } from 'express';
 import { OrderService } from './order.service';
-import { AppError } from '../../utils';
 import { type OrderInput } from './order.schema';
 
 export class OrderController {
@@ -63,23 +62,23 @@ export class OrderController {
     }
   };
 
-  public deleteUserOrder = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { orderId } = req.params;
-      const userId = res.locals.user._id;
+  // public deleteUserOrder = async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const { orderId } = req.params;
+  //     const userId = res.locals.user._id;
 
-      const order = await this.orderService.getSingleOrder(orderId, userId);
+  //     const order = await this.orderService.getSingleOrder(orderId, userId);
 
-      if (String(order.owner._id) !== String(userId)) {
-        next(new AppError(403, 'You cannot delete order'));
-        return;
-      }
+  //     if (String(order.owner._id) !== String(userId)) {
+  //       next(new AppError(403, 'You cannot delete order'));
+  //       return;
+  //     }
 
-      await this.orderService.deleteOrder(orderId);
+  //     await this.orderService.deleteOrder(orderId);
 
-      return res.sendStatus(204);
-    } catch (error: any) {
-      next(error);
-    }
-  };
+  //     return res.sendStatus(204);
+  //   } catch (error: any) {
+  //     next(error);
+  //   }
+  // };
 }
