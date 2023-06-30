@@ -1,101 +1,110 @@
 import { Types } from 'mongoose';
 import OrderModel, { type Order } from './order.model';
-import { type IOrder } from './order.interface';
+import { type ICreateOrder } from './order.interface';
 import { AppError } from '../../utils';
 // import ProductModel from '../product/product.model';
-import CartModel from '../cart/cart.model';
 import ProductModel from '../product/product.model';
+import StoreModel from '../store/store.model';
 
 export class OrderService {
-  public async createOrder(orderData: IOrder): Promise<Order> {
-    if (!Types.ObjectId.isValid(orderData.cart)) {
-      throw new AppError(400, 'Invalid cart ID');
+  public async createOrder(orderData: ICreateOrder, userId: string, storeId: string): Promise<Order> {
+    if (!Types.ObjectId.isValid(orderData.productId)) {
+      throw new AppError(400, 'Invalid product ID');
     }
 
-    if (!Types.ObjectId.isValid(orderData.owner)) {
+    if (!Types.ObjectId.isValid(storeId)) {
+      throw new AppError(400, 'Invalid store ID');
+    }
+
+    if (!Types.ObjectId.isValid(userId)) {
       throw new AppError(400, 'Invalid user ID');
     }
-    const cart = await CartModel.findOne({ _id: orderData.cart });
 
-    if (cart === null) {
-      throw new AppError(404, 'Cart not found');
+    const product = await ProductModel.findOne({ _id: orderData.productId });
+    const order = await OrderModel.findOne({ owner: userId });
+
+    if (product === null) {
+      throw new AppError(404, 'Product not found');
     }
 
-    const order = await OrderModel.create({ ...orderData, totalPrice: cart.totalPrice });
+    if (order !== null && order.status !== 'Paid') {
+      const productIndex = order.items.findIndex((item) => item.productId === orderData.productId);
 
-    return order;
-    //   const orderItemIds = Promise.all(
-    //     orderData.orderItems.map(async (item) => {
-    //       const newOrderItem = await OrderItemModel.create(item);
-    //       return newOrderItem._id;
-    //     })
-    //   );
-    //   const allOrderItemIds = await orderItemIds;
-    //   const totalPrices = await Promise.all(
-    //     allOrderItemIds.map(async (itemId) => {
-    //       const orderItem = await OrderItemModel.findOne({ _id: itemId }).populate('product', 'price');
-    //       if (orderItem !== null) {
-    //         const orderProduct = await ProductModel.findOne({ _id: orderItem?.product });
-    //         if (orderProduct !== null) {
-    //           const totalPrice = parseInt(orderProduct?.price) * orderItem.quantity;
-    //           return totalPrice;
-    //         }
-    //         throw new AppError(404, 'Product not found');
-    //       }
-    //       throw new AppError(404, 'Order item does not exist');
-    //     })
-    //   );
-    //   const totalPrice = totalPrices.reduce((x, y) => x + y, 0);
-    //   return await (
-    //     await OrderModel.create({ ...orderData, orderItems: allOrderItemIds, totalPrice })
-    //   ).populate('owner', 'name');
-  }
+      if (productIndex > -1) {
+        const orderItem = order.items[productIndex];
+        orderItem.quantity += orderData.quantity;
+        order.totalPrice = order.items.map((item) => item).reduce((a, b) => a + b.quantity * b.price, 0);
+        order.items[productIndex] = orderItem;
 
-  public async getProductIds(orderId: string) {
-    const order = await OrderModel.findOne({ _id: orderId });
-
-    if (order === null) {
-      throw new AppError(404, 'Order not found');
+        return await order.save();
+      }
+      order.items.push({
+        productId: orderData.productId,
+        quantity: orderData.quantity,
+        price: parseInt(product.price)
+      });
+      order.totalPrice = order.items.map((item) => item).reduce((a, b) => a + b.quantity * b.price, 0);
+      return await order.save();
     }
-    const cart = await CartModel.findOne({ _id: order.cart });
-    if (cart === null) {
-      throw new AppError(404, 'Cart not found');
-    }
-    const productIds = cart.items.map((item) => item.product);
-    // const storeInfo = {};
 
-    const store = Promise.all(
-      productIds.map(async (id) => {
-        const product = await ProductModel.findOne({ _id: id });
-        if (product === null) {
-          throw new AppError(404, 'Product not found');
+    if (product.storeId !== storeId) {
+      throw new AppError(400, 'You can only shop for products in this store');
+    }
+
+    const newOrder = await OrderModel.create({
+      owner: userId,
+      items: [
+        {
+          productId: orderData.productId,
+          quantity: orderData.quantity,
+          price: parseInt(product.price)
         }
-        const storeId = String(product.storeId);
-        const productPrice = product.price;
-        return { storeId, productPrice };
-      })
-    );
-    return await store;
-  }
-
-  public async getOrders(): Promise<Order[]> {
-    const orders = await OrderModel.find().populate('owner', 'name').sort('-createdAt');
-    return orders;
-  }
-
-  public async getUserSingleOrder(option: object): Promise<Order> {
-    const order = await OrderModel.findOne(option).populate('owner', 'name').populate({
-      path: 'cart'
+      ],
+      totalPrice: parseInt(product.price) * orderData.quantity,
+      storeId: product.storeId
     });
+    return newOrder;
+  }
+
+  public async getSingleOrder(orderId: string, userId: string): Promise<Order> {
+    if (!Types.ObjectId.isValid(orderId)) {
+      throw new AppError(400, 'Invalid order ID');
+    }
+
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppError(400, 'Invalid user ID');
+    }
+
+    const store = await StoreModel.findOne({ owner: userId });
+    const order = await OrderModel.findOne({ _id: orderId }).populate('owner', 'name');
+
+    if (store === null) {
+      throw new AppError(404, 'Store not found');
+    }
 
     if (order === null) {
       throw new AppError(404, 'Order not found');
     }
+
+    if (order.storeId !== String(store._id)) {
+      throw new AppError(403, 'This order is not from your store');
+    }
+
     return order;
   }
 
-  public async getAllOrdersOfUser(option: object): Promise<Order[]> {
-    const orders = await OrderModel.find(option);
+  public async getAllOrdersOfStore(userId: string): Promise<Order[]> {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppError(400, 'Invalid user ID');
+    }
+
+    const store = await StoreModel.findOne({ owner: userId });
+
+    if (store === null) {
+      throw new AppError(404, 'Store not found');
+    }
+
+    const orders = await OrderModel.find({ storeId: store._id });
 
     return orders;
   }

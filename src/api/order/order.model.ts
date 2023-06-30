@@ -1,9 +1,9 @@
 import { modelOptions, prop, Severity, getModelForClass, Ref } from '@typegoose/typegoose';
 import { type User } from '../user/user.model';
-import { type Cart } from '../cart/cart.model';
 
 enum Status {
   Pending = 'Pending',
+  Paid = 'Paid',
   Reserved = 'Reserved',
   Processing = 'Processing',
   Dispatched = 'Dispatched',
@@ -11,11 +11,6 @@ enum Status {
   Delivered = 'Delivered'
 }
 
-enum PaymentMethod {
-  PayOnDelivery = 'Pay On Delivery',
-  PayWithCard = 'Pay With Card',
-  StorePickup = 'Reserve'
-}
 @modelOptions({
   schemaOptions: {
     collection: 'orders',
@@ -25,33 +20,32 @@ enum PaymentMethod {
     allowMixed: Severity.ALLOW
   }
 })
+class OrderItem {
+  @prop({ required: true })
+  public productId!: string;
+
+  @prop({ required: true, default: 1, min: 1 })
+  public quantity!: number;
+
+  @prop({ default: 0 })
+  public price: number;
+}
+
 export class Order {
   @prop({ ref: 'User', type: () => String, required: true })
   public owner!: Ref<User>;
 
-  @prop({ ref: 'Cart', type: () => String, required: true })
-  public cart!: Ref<Cart>;
-
-  @prop()
-  public phone?: String;
+  @prop({ required: true })
+  public items!: OrderItem[];
 
   @prop({ default: Status.Pending, enum: Status })
   public status: Status;
 
-  @prop({ default: PaymentMethod.PayWithCard, enum: PaymentMethod })
-  public paymentMethod: PaymentMethod;
-
-  @prop()
-  public deliveryAddress?: string;
-
-  @prop()
-  public state?: string;
-
-  @prop({ default: 'Nigeria' })
-  public country?: string;
-
   @prop({ default: 0 })
   public totalPrice: number;
+
+  @prop()
+  public storeId: string;
 }
 
 const OrderModel = getModelForClass(Order);

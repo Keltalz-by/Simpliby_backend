@@ -11,8 +11,9 @@ import swaggerUi from 'swagger-ui-express';
 import mongoSanitize from 'express-mongo-sanitize';
 import { type Routes } from './common';
 import { ErrorHandler, NotFoundError, limiter } from './middlewares';
-import { logger, stream } from './utils';
+import { connectDB, logger, stream } from './utils';
 import { NODE_ENV, PORT, SERVER_URL, ORIGIN, CREDENTIALS } from './config';
+import { set } from 'mongoose';
 
 const allowedOrigins = ORIGIN?.split(',').map((url) => url.trim());
 
@@ -28,6 +29,7 @@ export class App {
 
     this.app.disable('x-powered-by');
 
+    this.connectToDatabase();
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
@@ -48,6 +50,13 @@ export class App {
     return this.app;
   }
 
+  private connectToDatabase() {
+    if (this.env !== 'production') {
+      set('debug', true);
+    }
+    void connectDB();
+  }
+
   private initializeMiddlewares() {
     this.app.use(morgan('dev', { stream }));
     this.app.use(cors({ origin: allowedOrigins, credentials: CREDENTIALS }));
@@ -62,9 +71,9 @@ export class App {
   }
 
   private initializeRoutes(routes: Routes[]) {
-    routes.forEach((route) => {
+    for (const route of routes) {
       this.app.use('/api/v1', route.router);
-    });
+    }
   }
 
   private initializeSwagger() {

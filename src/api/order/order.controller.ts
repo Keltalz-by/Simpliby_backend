@@ -1,59 +1,50 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { type NextFunction, type Request, type Response } from 'express';
 import { OrderService } from './order.service';
-import { Types } from 'mongoose';
 import { AppError } from '../../utils';
 import { type OrderInput } from './order.schema';
 
 export class OrderController {
   public orderService = new OrderService();
 
-  public createOrder = async (req: Request<{}, {}, OrderInput>, res: Response, next: NextFunction) => {
+  public createOrder = async (
+    req: Request<OrderInput['params'], {}, OrderInput['body']>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
+      const { storeId } = req.params;
       const orderData = req.body;
       const userId: string = res.locals.user._id;
 
-      if (orderData.owner !== userId.toString()) {
-        next(new AppError(403, 'You cannot create the order'));
-        return;
-      }
+      const order = await this.orderService.createOrder(orderData, userId, storeId);
 
-      const order = await this.orderService.createOrder({ ...orderData, owner: userId });
-
-      return res.status(201).json({ success: true, data: order });
+      res.status(201).json({ success: true, data: order });
     } catch (err: any) {
       next(err);
     }
   };
 
-  public getAllOrders = async (_req: Request, res: Response, next: NextFunction) => {
+  public storeOrders = async (_req: Request, res: Response, next: NextFunction) => {
     try {
-      const orders = await this.orderService.getOrders();
+      const userId = res.locals.user._id;
 
-      return res.status(200).json({ success: true, count: orders.length, data: orders });
+      const orders = await this.orderService.getAllOrdersOfStore(userId);
+
+      res.status(200).json({ success: true, count: orders.length, data: orders });
     } catch (error: any) {
       next(error);
     }
   };
 
-  public singleOrder = async (req: Request, res: Response, next: NextFunction) => {
+  public singleStoreOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { orderId } = req.params;
       const userId = res.locals.user._id;
+      const { orderId } = req.params;
 
-      if (!Types.ObjectId.isValid(orderId)) {
-        next(new AppError(400, 'Invalid orderID'));
-        return;
-      }
+      const order = await this.orderService.getSingleOrder(orderId, userId);
 
-      const order = await this.orderService.getUserSingleOrder({ _id: orderId });
-
-      if (String(order.owner._id) !== String(userId)) {
-        next(new AppError(403, 'This is not your order'));
-        return;
-      }
-
-      return res.status(200).json({ success: true, data: order });
+      res.status(200).json({ success: true, data: order });
     } catch (error: any) {
       next(error);
     }
@@ -72,29 +63,12 @@ export class OrderController {
     }
   };
 
-  public userOrders = async (_req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = res.locals.user._id;
-
-      const orders = await this.orderService.getAllOrdersOfUser({ owner: userId });
-
-      res.status(200).json({ success: true, count: orders.length, data: orders });
-    } catch (error: any) {
-      next(error);
-    }
-  };
-
   public deleteUserOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { orderId } = req.params;
       const userId = res.locals.user._id;
 
-      if (!Types.ObjectId.isValid(orderId)) {
-        next(new AppError(400, 'Invalid orderID'));
-        return;
-      }
-
-      const order = await this.orderService.getUserSingleOrder({ _id: orderId });
+      const order = await this.orderService.getSingleOrder(orderId, userId);
 
       if (String(order.owner._id) !== String(userId)) {
         next(new AppError(403, 'You cannot delete order'));
@@ -104,17 +78,6 @@ export class OrderController {
       await this.orderService.deleteOrder(orderId);
 
       return res.sendStatus(204);
-    } catch (error: any) {
-      next(error);
-    }
-  };
-
-  public getProductIdsFromOrder = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { orderId } = req.params;
-      const productIds = await this.orderService.getProductIds(orderId);
-
-      res.status(200).json({ status: true, message: 'Product IDs gotten successfully', data: productIds });
     } catch (error: any) {
       next(error);
     }

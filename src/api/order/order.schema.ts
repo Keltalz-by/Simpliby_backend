@@ -1,20 +1,18 @@
-import { object, string, type TypeOf } from 'zod';
+import { object, string, type TypeOf, number } from 'zod';
 
 export const createOrderSchema = object({
+  params: object({
+    storeId: string({
+      required_error: 'Store ID is required'
+    })
+  }),
   body: object({
-    owner: string({
-      required_error: 'User ID is required'
+    productId: string({
+      required_error: 'Product ID is required'
     }),
-    cart: string({
-      required_error: 'Cart ID is required'
-    }),
-    paymentMethod: string({
-      required_error: 'Payment Method is required'
-    }),
-    phone: string().optional(),
-    deliveryAddress: string().optional(),
-    state: string().optional(),
-    country: string().optional()
+    quantity: number({
+      required_error: 'Quantity of product is required'
+    })
   })
 });
 
@@ -31,5 +29,5 @@ export const orderPaymentRequest = object({
   })
 });
 
-export type OrderInput = TypeOf<typeof createOrderSchema>['body'];
+export type OrderInput = TypeOf<typeof createOrderSchema>;
 export type OrderPaymentRequestInput = TypeOf<typeof orderPaymentRequest>;
