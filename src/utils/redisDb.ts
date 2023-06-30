@@ -1,25 +1,25 @@
-import { createClient } from 'redis';
-import { logger } from './logger';
-// import { REDIS_URL } from '../config';
+// import { createClient } from 'redis';
+// import { logger } from './logger';
+// // import { REDIS_URL } from '../config';
 
-// const redisClient = createClient({
-//   url: REDIS_URL
-// });
+// // const redisClient = createClient({
+// //   url: REDIS_URL
+// // });
 
-const redisClient = createClient();
+// const redisClient = createClient();
 
-const connectRedis = async () => {
-  try {
-    await redisClient.connect();
-    logger.info('====== Redis Connected =====');
-    logger.info(`============================`);
-  } catch (err: any) {
-    logger.error(err.message);
-  }
-};
+// const connectRedis = async () => {
+//   try {
+//     await redisClient.connect();
+//     logger.info('====== Redis Connected =====');
+//     logger.info(`============================`);
+//   } catch (err: any) {
+//     logger.error(err.message);
+//   }
+// };
 
-void connectRedis();
+// void connectRedis();
 
-redisClient.on('error', (err: any) => logger.error(err.message));
+// redisClient.on('error', (err: any) => logger.error(err.message));
 
-export default redisClient;
+// export default redisClient;

@@ -1,4 +1,4 @@
-import redisClient from './redisDb';
+// import redisClient from './redisDb';
 import cloudinary from './cloudinary';
 
 export { AppError } from './appError';
@@ -21,5 +21,5 @@ export {
 export { sendOtpVerificationMail } from './sendOtpVerificationMail';
 export { signJwt, verifyJwt } from './jwt';
 export { upload } from './multer';
-export { redisClient };
+// export { redisClient };
 export { cloudinary };
