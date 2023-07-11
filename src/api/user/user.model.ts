@@ -48,9 +48,6 @@ export class User {
   public occupation: string;
 
   @prop({ default: [] })
-  public followers: string[];
-
-  @prop({ default: [] })
   public followings: string[];
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {

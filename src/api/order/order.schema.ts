@@ -21,11 +21,6 @@ export const orderPaymentRequest = object({
     orderId: string({
       required_error: 'Order ID is required'
     })
-  }),
-  body: object({
-    email: string({
-      required_error: 'Email is required'
-    })
   })
 });
 

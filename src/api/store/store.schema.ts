@@ -61,8 +61,8 @@ export const updateStoreSchema = object({
     country: string({
       required_error: 'Country is required'
     }),
-    storeImages: any({
-      required_error: 'Upload at least one image of your store'
+    storeImage: any({
+      required_error: 'Upload aan image of your store'
     }),
     logo: any({
       required_error: 'Upload your store logo'

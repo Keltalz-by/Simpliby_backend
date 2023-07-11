@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { type Router } from 'express';
 import cors from 'cors';
 import http from 'http';
 import helmet from 'helmet';
@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import mongoSanitize from 'express-mongo-sanitize';
-import { type Routes } from './common';
+// import { type Routes } from './common';
 import { ErrorHandler, NotFoundError, limiter } from './middlewares';
 import { connectDB, logger, stream } from './utils';
 import { NODE_ENV, PORT, SERVER_URL, ORIGIN, CREDENTIALS } from './config';
@@ -22,7 +22,7 @@ export class App {
   public env: string;
   public port: string | number;
 
-  constructor(routes: Routes[]) {
+  constructor(routes: Router[]) {
     this.app = express();
     this.port = PORT ?? 5000;
     this.env = NODE_ENV ?? 'development';
@@ -70,10 +70,10 @@ export class App {
     this.app.use(mongoSanitize());
   }
 
-  private initializeRoutes(routes: Routes[]) {
-    for (const route of routes) {
-      this.app.use('/api/v1', route.router);
-    }
+  private initializeRoutes(routes: Router[]) {
+    routes.forEach((route) => {
+      this.app.use('/api/v1', route);
+    });
   }
 
   private initializeSwagger() {

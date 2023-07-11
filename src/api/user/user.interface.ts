@@ -10,6 +10,5 @@ export interface IUser {
   location?: string;
   role?: string;
   occupation?: string;
-  followers?: string[];
   followings?: string[];
 }

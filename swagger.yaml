@@ -232,16 +232,16 @@ paths:
         '500':
           description: Internal server error
 
-  /stores/{userId}/follow:
+  /stores/{storeId}:
     patch:
       tags:
         - Store
-      summary: A store can follow a user
-      operationId: followUser
+      summary: Admin can verify a store
+      operationId: verifyStore
       parameters:
-        - name: userId
+        - name: storeId
           in: path
-          description: ID of user to follow
+          description: ID of store to verify
           required: true
           schema:
             type: string
@@ -250,21 +250,23 @@ paths:
           description: Successful operation
         '401':
           description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
           description: Not Found
         '500':
           description: Internal Server Error
 
-  /stores/{userId}/unfollow:
+  /stores/{storeId}/follow:
     patch:
       tags:
         - Store
-      summary: A store can unfollow a user
-      operationId: unfollowUser
+      summary: A user can follow a store
+      operationId: followStore
       parameters:
-        - name: userId
+        - name: storeId
           in: path
-          description: ID of user to unfollow
+          description: ID of store to follow
           required: true
           schema:
             type: string
@@ -273,6 +275,33 @@ paths:
           description: Successful operation
         '401':
           description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+
+  /stores/{storeId}/unfollow:
+    patch:
+      tags:
+        - Store
+      summary: A user can unfollow a store
+      operationId: unfollowStore
+      parameters:
+        - name: storeId
+          in: path
+          description: ID of store to unfollow
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
           description: Not Found
         '500':
@@ -282,10 +311,10 @@ paths:
     patch:
       tags:
         - Store
-      summary: Complete store details
+      summary: Update store details
       operationId: updateStore
       requestBody:
-        description: A logged in store user can complete store details
+        description: A logged in store user can update store details
         content:
           multipart/form-data:
             schema:
@@ -455,7 +484,7 @@ paths:
       tags:
         - Order
       summary: View all orders for store
-      description: A seller can view all the orders for store
+      description: A seller can view all the orders for its store
       operationId: storeOrders
       responses:
         '200':
@@ -509,84 +538,109 @@ paths:
         '500':
           description: Internal Server Error
 
-  #################
-  # ToBuy API #
-  #################
-  /tobuy:
+  /orders/{orderId}/pay:
     post:
       tags:
-        - ToBuy
-      summary: Create a new to buy list
-      operationId: CreateToBuy
-      requestBody:
-        description: Add multiple contents to the tobuy list
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateToBuy'
-      responses:
-        '201':
-          description: Success
-        '400':
-          description: Bad request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Internal server error
-
-  /tobuy/{id}:
-    patch:
-      tags:
-        - ToBuy
-      summary: Complete a tobuy
-      operationId: CompleteToBuy
+        - Order
+      summary: User can pay order
+      description: A user can pay for order
+      operationId: PayForOrder
       parameters:
-        - name: id
+        - name: orderId
           in: path
-          description: ID of the tobuy to complete
+          description: ID of the order to pay for
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: Success
-        '400':
-          description: Bad request
+          description: Successful operation
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
-        '404':
-          description: Not Found
         '500':
-          description: Internal Server Error
+          description: Internal server error
 
-    delete:
-      tags:
-        - ToBuy
-      summary: Delete a tobuy
-      operationId: DeleteToBuy
-      parameters:
-        - name: id
-          in: path
-          description: ID of the tobuy to delete
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Success
-        '400':
-          description: Bad request
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
+
+  #################
+  # ToBuy API #
+  #################
+  # /tobuy:
+  #   post:
+  #     tags:
+  #       - ToBuy
+  #     summary: Create a new to buy list
+  #     operationId: CreateToBuy
+  #     requestBody:
+  #       description: Add multiple contents to the tobuy list
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/CreateToBuy'
+  #     responses:
+  #       '201':
+  #         description: Success
+  #       '400':
+  #         description: Bad request
+  #       '401':
+  #         description: Unauthorized
+  #       '500':
+  #         description: Internal server error
+
+  # /tobuy/{id}:
+  #   patch:
+  #     tags:
+  #       - ToBuy
+  #     summary: Complete a tobuy
+  #     operationId: CompleteToBuy
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         description: ID of the tobuy to complete
+  #         required: true
+  #         schema:
+  #           type: string
+  #     responses:
+  #       '200':
+  #         description: Success
+  #       '400':
+  #         description: Bad request
+  #       '401':
+  #         description: Unauthorized
+  #       '403':
+  #         description: Forbidden
+  #       '404':
+  #         description: Not Found
+  #       '500':
+  #         description: Internal Server Error
+
+  #   delete:
+  #     tags:
+  #       - ToBuy
+  #     summary: Delete a tobuy
+  #     operationId: DeleteToBuy
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         description: ID of the tobuy to delete
+  #         required: true
+  #         schema:
+  #           type: string
+  #     responses:
+  #       '204':
+  #         description: Success
+  #       '400':
+  #         description: Bad request
+  #       '401':
+  #         description: Unauthorized
+  #       '403':
+  #         description: Forbidden
+  #       '404':
+  #         description: Not Found
+  #       '500':
+  #         description: Internal Server Error
 
 components:
   securitySchemes:
@@ -661,7 +715,7 @@ components:
         - address
         - city
         - country
-        - storeImages
+        - storeImage
         - logo
       type: object
       properties:
@@ -683,13 +737,13 @@ components:
         logo:
           type: string
           format: binary
-    CreateToBuy:
-      type: array
-      items:
-        type: object
-        properties:
-          title:
-            type: string
-      example:
-        - title: Buy a new phone
-        - title: Repair my laptop
+    # CreateToBuy:
+    #   type: array
+    #   items:
+    #     type: object
+    #     properties:
+    #       title:
+    #         type: string
+    #   example:
+    #     - title: Buy a new phone
+    #     - title: Repair my laptop

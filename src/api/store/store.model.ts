@@ -51,9 +51,6 @@ export class Store {
   @prop({ default: [] })
   public followers: string[];
 
-  @prop({ default: [] })
-  public followings: string[];
-
   @prop({ default: false })
   public isStoreVerified: boolean;
 

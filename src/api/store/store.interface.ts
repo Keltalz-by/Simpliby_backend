@@ -21,7 +21,7 @@ export interface IUpdateStore {
   address: string;
   city: string;
   country: string;
-  storeImages?: IGallery[];
+  storeImage?: IGallery;
   logo?: IGallery;
 }
 
@@ -38,7 +38,6 @@ export interface IStore {
   logo?: IGallery;
   website?: string;
   followers?: string[];
-  followings?: string[];
   businessHours?: string;
   isStoreVerified?: boolean;
   balance?: number;

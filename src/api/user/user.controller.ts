@@ -54,7 +54,7 @@ export class UserController {
   public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { userId } = req.params;
-      const id = res.locals.user.user;
+      const id: string = res.locals.user.user;
 
       if (!Types.ObjectId.isValid(userId)) {
         next(new AppError(400, 'Invalid user ID'));
@@ -68,7 +68,7 @@ export class UserController {
 
       await this.userService.deleteUser(userId);
 
-      return res.sendStatus(204);
+      res.sendStatus(204);
     } catch (error: any) {
       next(error);
     }

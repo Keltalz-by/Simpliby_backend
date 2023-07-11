@@ -7,8 +7,6 @@ enum Status {
   Failed = 'Failed'
 }
 
-export const privateFields = ['__v', 'password', 'createdAt', 'updatedAt'];
-
 @modelOptions({
   schemaOptions: {
     collection: 'payments',

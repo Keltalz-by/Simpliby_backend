@@ -12,6 +12,9 @@ export interface IPayment {
 export interface IPaymentData {
   email: string;
   amount: string;
+  reference: string;
+  // subaccount: string;
+  // bearer: string;
 }
 
 interface IData {

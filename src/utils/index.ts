@@ -16,7 +16,8 @@ export {
   accessTokenCookieOptions,
   createOtp,
   storeVerifiedTemplate,
-  emailVerifiedPasswordTemplate
+  emailVerifiedPasswordTemplate,
+  makePayment
 } from './helpers';
 export { sendOtpVerificationMail } from './sendOtpVerificationMail';
 export { signJwt, verifyJwt } from './jwt';

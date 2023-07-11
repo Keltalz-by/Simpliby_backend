@@ -1,49 +1,99 @@
 import { Types } from 'mongoose';
-import axios from 'axios';
-import { type IPaymentData, type IPayment, type IPaymentResponse } from './payment.interface';
+import { customAlphabet } from 'nanoid';
 import PaymentModel from './payment.model';
-import { AppError } from '../../utils';
+import { AppError, makePayment } from '../../utils';
 import OrderModel from '../order/order.model';
-import { PAYSTACK_INITIALIZE_URL, PAYSTACK_SECRET_KEY } from '../../config';
 import UserModel from '../user/user.model';
 
-const url = PAYSTACK_INITIALIZE_URL as string;
-
 export class PaymentService {
-  public async getPaymentReference(data: IPaymentData) {
-    try {
-      const response = await axios.post<IPaymentResponse>(url, data, {
-        headers: {
-          Authorization: `Bearer ${PAYSTACK_SECRET_KEY as string}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log(response.data);
-      return { authorizationUrl: response.data.data.authorization_url, reference: response.data.data.reference };
-    } catch (error: any) {
-      throw new AppError(400, error.response.data.error);
-    }
-  }
-
-  public async initiatePayment(data: IPayment) {
-    if (!Types.ObjectId.isValid(data.order)) {
+  public async makePayment(email: string, orderId: string) {
+    const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 10);
+    if (!Types.ObjectId.isValid(orderId)) {
       throw new AppError(400, 'Invalid order ID');
     }
 
-    const user = await UserModel.findOne({ email: data.owner });
-
-    if (user === null) {
-      throw new AppError(404, `User with email ${data.owner} not found`);
-    }
-
-    const order = await OrderModel.findOne({ _id: data.order });
+    const order = await OrderModel.findOne({ _id: orderId });
 
     if (order === null) {
       throw new AppError(404, 'Order not found');
     }
 
-    const initiatePayment = await PaymentModel.create({ ...data, bill: order.totalPrice });
+    const user = await UserModel.findOne({ _id: order.owner });
 
-    return initiatePayment;
+    if (user === null) {
+      throw new AppError(404, 'User not found');
+    }
+
+    if (user.email !== email) {
+      throw new AppError(403, 'You can only pay for your order');
+    }
+
+    if (order.totalPrice < 2500) {
+      const fee: number = 0.015 * order.totalPrice;
+      const result = await makePayment({
+        email,
+        amount: String((order.totalPrice + fee) * 100),
+        reference: `Pay-${nanoid()}`
+      });
+
+      await PaymentModel.create({
+        owner: order.owner,
+        order: order._id,
+        bill: order.totalPrice + fee,
+        reference: result.reference
+      });
+      return {
+        authorizationUrl: result.authorizationUrl,
+        reference: result.reference,
+        charges: fee
+      };
+    }
+    const fee: number = 0.015 * order.totalPrice + 100;
+    const feeCap: number = 2000;
+
+    if (fee > feeCap) {
+      const result = await makePayment({
+        email,
+        amount: String((order.totalPrice + feeCap) * 100),
+        reference: `Pay-${nanoid()}`
+      });
+
+      await PaymentModel.create({
+        owner: order.owner,
+        order: order._id,
+        bill: order.totalPrice + feeCap,
+        reference: result.reference
+      });
+      return {
+        authorizationUrl: result.authorizationUrl,
+        reference: result.reference,
+        charges: feeCap
+      };
+    }
+    const result = await makePayment({
+      email,
+      amount: String((order.totalPrice + fee) * 100),
+      reference: `Pay-${nanoid()}`
+    });
+
+    await PaymentModel.create({
+      owner: order.owner,
+      order: order._id,
+      bill: order.totalPrice + fee,
+      reference: result.reference
+    });
+    return { authorizationUrl: result.authorizationUrl, reference: result.reference, charges: fee };
+  }
+
+  public async confirmPayment(orderId: string) {
+    if (!Types.ObjectId.isValid(orderId)) {
+      throw new AppError(400, 'Invalid order ID');
+    }
+
+    const order = await OrderModel.findOne({ _id: orderId });
+
+    if (order === null) {
+      throw new AppError(404, 'Order not found');
+    }
   }
 }

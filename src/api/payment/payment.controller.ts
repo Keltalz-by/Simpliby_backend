@@ -1,62 +1,56 @@
-// import { type NextFunction, type Request, type Response } from 'express';
-// import { type OrderPaymentRequestInput } from '../order/order.schema';
-// import { PaymentService } from './payment.service';
-// import { OrderService } from '../order/order.service';
-// import { AppError } from '../../utils';
-// import { UserService } from '../user/user.service';
+import { type NextFunction, type Request, type Response } from 'express';
+import crypto from 'crypto';
+import { PaymentService } from './payment.service';
+import { OrderService } from '../order/order.service';
+import { AppError } from '../../utils';
+import { UserService } from '../user/user.service';
+import { PAYSTACK_SECRET_KEY } from '../../config';
 
-// export class PaymentController {
-//   public paymentService = new PaymentService();
-//   public orderService = new OrderService();
-//   public userService = new UserService();
+export class PaymentController {
+  public paymentService = new PaymentService();
+  public orderService = new OrderService();
+  public userService = new UserService();
 
-//   public initiatePayment = async (
-//     req: Request<OrderPaymentRequestInput['params']>,
-//     res: Response,
-//     next: NextFunction
-//   ) => {
-//     try {
-//       const { orderId } = req.params;
-//       const data = req.body;
-//       const userId: string = res.locals.user._id;
-//       const order = await this.orderService.getUserSingleOrder({ _id: orderId });
+  public orderPayment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { orderId } = req.params;
+      const userId: string = res.locals.user._id;
 
-//       const user = await this.userService.findUser({ _id: userId });
+      const user = await this.userService.findUser({ _id: userId });
 
-//       if (user === null) {
-//         next(new AppError(404, 'User does not exist'));
-//         return;
-//       }
+      if (user === null) {
+        next(new AppError(404, 'User does not exist'));
+        return;
+      }
 
-//       if (data.email !== user.email) {
-//         next(new AppError(403, 'You are not allowed to make to make the payment'));
-//         return;
-//       }
+      const { authorizationUrl, charges } = await this.paymentService.makePayment(user.email, orderId);
 
-//       if (order.paymentMethod !== 'Pay With Card') {
-//         next(new AppError(400, 'This option is not applicable to you'));
-//         return;
-//       }
+      res.status(200).json({
+        success: true,
+        message: 'Payment initiated successfully',
+        data: { authorizationUrl, charges }
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//       const { authorizationUrl, reference } = await this.paymentService.getPaymentReference({
-//         email: user.email,
-//         amount: (order.totalPrice * 100).toString()
-//       });
+  public confirmOrderPayment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // const { orderId } = req.params;
+      const secret = PAYSTACK_SECRET_KEY as string;
+      const hash = crypto.createHmac('sha512', secret).update(JSON.stringify(req.body)).digest('hex');
 
-//       await this.paymentService.initiatePayment({
-//         ...data,
-//         owner: user.email,
-//         order: orderId,
-//         reference
-//       });
-
-//       res.status(200).json({
-//         success: true,
-//         message: 'Payment initiated successfully',
-//         data: authorizationUrl
-//       });
-//     } catch (error: any) {
-//       next(error);
-//     }
-//   };
-// }
+      if (hash === req.headers['x-paystack-signature']) {
+        const event = req.body;
+        if (event.length !== 0 && event.event === 'paymentrequest.success') {
+          return res.status(200).json({ status: 'success', message: 'Transfer successful' });
+        }
+      }
+      res.send(200);
+    } catch (error: any) {
+      next(error);
+    }
+    // throw new AppError(400, 'You cannot make such request');
+  };
+}

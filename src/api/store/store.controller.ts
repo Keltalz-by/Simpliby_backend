@@ -15,10 +15,7 @@ export class StoreController {
   public createStore = async (req: Request<{}, {}, ICreateStore>, res: Response, next: NextFunction) => {
     try {
       const userId: string = res.locals.user._id;
-      console.log(userId);
       const storeData: ICreateStore = req.body;
-
-      console.log(storeData);
 
       const allImages = req.files as Express.Multer.File[];
 
@@ -65,37 +62,6 @@ export class StoreController {
     }
   };
 
-  public followUser = async (req: Request<{ userId: string }, {}, {}>, res: Response, next: NextFunction) => {
-    try {
-      const { userId } = req.params;
-      const user = res.locals.user;
-
-      const store = await this.storeService.findStore({ owner: user._id });
-
-      if (store === null) {
-        next(new AppError(404, 'Store not found'));
-        return;
-      }
-
-      await this.storeService.followUser(userId, String(store._id));
-      res.status(200).json({ status: true, message: 'User followed successfully' });
-    } catch (error: any) {
-      next(error);
-    }
-  };
-
-  public unfollowUser = async (req: Request<{ userId: string }, {}, {}>, res: Response, next: NextFunction) => {
-    try {
-      const { userId } = req.params;
-      const storeId: string = res.locals.store._id;
-
-      await this.storeService.unfollowUser(userId, storeId);
-      res.status(200).json({ status: true, message: 'User unfollowed successfully' });
-    } catch (error: any) {
-      next(error);
-    }
-  };
-
   public updateStore = async (req: Request<{}, {}, UpdateStoreInput>, res: Response, next: NextFunction) => {
     try {
       const storeId: string = res.locals.store._id;
@@ -119,8 +85,8 @@ export class StoreController {
           // @ts-expect-error not really an error
           for (const file of allImages[key]) {
             const path: string = file.path;
-            const images = await uploadToCloudinary(path, 'Store-Images');
-            update.storeImages.push(images);
+            const image = await uploadToCloudinary(path, 'Store-Images');
+            update.storeImage = image;
           }
         }
 
@@ -128,7 +94,7 @@ export class StoreController {
           // @ts-expect-error not really an error
           for (const file of allImages[key]) {
             const path: string = file.path;
-            const image = await uploadToCloudinary(path, 'Store-Logo');
+            const image = await uploadToCloudinary(path, 'Store-Logos');
             update.logo = image;
           }
         }
@@ -169,7 +135,7 @@ export class StoreController {
       const { name } = req.body;
       const products = await this.storeService.searchStore(name);
 
-      return res.status(200).json({ success: true, data: products });
+      res.status(200).json({ success: true, data: products });
     } catch (error: any) {
       next(error);
     }

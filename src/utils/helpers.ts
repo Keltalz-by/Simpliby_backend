@@ -1,15 +1,20 @@
 import otp from 'otp-generator';
 import fs from 'fs';
-import cloudinary from './cloudinary';
 import { type CookieOptions, type Response } from 'express';
+import cloudinary from './cloudinary';
 import { signJwt } from './jwt';
 import {
   ACCESS_TOKEN_EXPIRESIN,
   ACCESS_TOKEN_PRIVATE_KEY,
   NODE_ENV,
+  PAYSTACK_INITIALIZE_URL,
+  PAYSTACK_SECRET_KEY,
   REFRESH_TOKEN_EXPIRESIN,
   REFRESH_TOKEN_PRIVATE_KEY
 } from '../config';
+import { type IPaymentResponse, type IPaymentData } from '../api/payment/payment.interface';
+import { AppError } from './appError';
+import axios from 'axios';
 
 interface IOptions {
   digits?: boolean;
@@ -56,6 +61,22 @@ export const createOtp = (): string => {
     specialChars: false
   });
   return newOtp;
+};
+
+export const makePayment = async (data: IPaymentData) => {
+  try {
+    const url = PAYSTACK_INITIALIZE_URL as string;
+
+    const response = await axios.post<IPaymentResponse>(url, data, {
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET_KEY as string}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return { authorizationUrl: response.data.data.authorization_url, reference: response.data.data.reference };
+  } catch (error: any) {
+    throw new AppError(400, error.response.data.error);
+  }
 };
 
 export async function uploadToCloudinary(path: string, folderName: string) {
