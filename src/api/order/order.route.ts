@@ -1,10 +1,25 @@
-// /* eslint-disable @typescript-eslint/no-misused-promises */
-// import { Router } from 'express';
-// import { type Routes } from '../../common';
-// import { deserializeUser, requireUser, restrictUser, validateResource } from '../../middlewares';
-// import { OrderController } from './order.controller';
-// import { createOrderSchema } from './order.schema';
-// import { PaymentController } from '../payment/payment.controller';
+/* eslint-disable @typescript-eslint/no-misused-promises */
+import { Router } from 'express';
+import { deserializeUser, requireUser, restrictUser, validateResource } from '../../middlewares';
+import { OrderController } from './order.controller';
+import { createOrderSchema } from './order.schema';
+import { PaymentController } from '../payment/payment.controller';
+
+export const orderRoute = Router();
+const path = '/orders';
+const order = new OrderController();
+const payment = new PaymentController();
+
+orderRoute.post(
+  `${path}`,
+  deserializeUser,
+  requireUser,
+  restrictUser('user'),
+  validateResource(createOrderSchema),
+  order.createOrder
+);
+orderRoute.post(`${path}/:orderId/pay`, deserializeUser, requireUser, restrictUser('user'), payment.orderPayment);
+// orderRoute.get(`${path}`, order.getAllOrders);
 
 // export class OrderRoute implements Routes {
 //   public path = '/orders/';
@@ -18,8 +33,7 @@
 
 //   private initializeRoutes() {
 //     this.router.use(deserializeUser, requireUser, restrictUser('user'));
-//     this.router.post(`${this.path}`, validateResource(createOrderSchema), this.order.createOrder);
-//     this.router.post(`${this.path}:orderId/pay`, this.payment.orderPayment);
+//
 //     // this.router.get(`${this.path}`, this.order.getAllOrders);
 //     // this.router.get(`${this.path}myorders`, this.order.userOrders);
 //     // this.router.get(`${this.path}:orderId`, this.order.userOrders);

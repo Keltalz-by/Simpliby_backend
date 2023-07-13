@@ -1,24 +1,21 @@
-// /* eslint-disable @typescript-eslint/no-misused-promises */
-// import { Router } from 'express';
-// import { type Routes } from '../../common';
-// import { CartController } from './cart.controller';
-// import { deserializeUser, validateResource } from '../../middlewares';
-// import { addToCartSchema } from './cart.schema';
+/* eslint-disable @typescript-eslint/no-misused-promises */
+import { Router } from 'express';
+import { CartController } from './cart.controller';
+import { deserializeUser, requireUser, restrictUser, validateResource } from '../../middlewares';
+import { addToCartSchema } from './cart.schema';
 
-// export class CartRoute implements Routes {
-//   public path = '/carts/';
-//   public router = Router();
-//   public cart = new CartController();
+export const cartRoute = Router();
+const path = '/cart';
+const cart = new CartController();
 
-//   constructor() {
-//     this.initializeRoutes();
-//   }
-
-//   private initializeRoutes() {
-//     this.router.use(deserializeUser);
-//     this.router.post(`${this.path}`, validateResource(addToCartSchema), this.cart.AddProductToCart);
-//     this.router.get(`${this.path}`, this.cart.getUserCart);
-//     this.router.patch(`${this.path}:productId`, this.cart.deleteProductfromCart);
-//     this.router.delete(`${this.path}`, this.cart.deleteUserCart);
-//   }
-// }
+cartRoute.post(
+  `${path}`,
+  deserializeUser,
+  requireUser,
+  restrictUser('user'),
+  validateResource(addToCartSchema),
+  cart.AddProductToCart
+);
+cartRoute.get(`${path}`, deserializeUser, requireUser, restrictUser('user'), cart.getUserCart);
+cartRoute.patch(`${path}/:productId`, deserializeUser, requireUser, restrictUser('user'), cart.deleteProductfromCart);
+cartRoute.delete(`${path}`, deserializeUser, requireUser, restrictUser('user'), cart.deleteUserCart);
