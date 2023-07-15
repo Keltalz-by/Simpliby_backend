@@ -473,6 +473,13 @@ paths:
       summary: User creates an order
       description: A user can create an order
       operationId: createOrder
+      parameters:
+        - name: storeIdId
+          in: path
+          description: ID of the store to order from
+          required: true
+          schema:
+            type: string
       requestBody:
         description: A user can create an order
         content:
@@ -522,6 +529,13 @@ paths:
       summary: View a single order
       description: A seller can view a single order
       operationId: singleOrder
+      parameters:
+        - name: orderId
+          in: path
+          description: ID of the order to retrieve
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Success
@@ -561,7 +575,7 @@ paths:
     get:
       tags:
         - Order
-      summary: User can pay order
+      summary: User can pay for order
       description: A user can pay for order
       operationId: PayForOrder
       parameters:
