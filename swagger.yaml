@@ -558,7 +558,7 @@ paths:
           description: Internal Server Error
 
   /orders/{orderId}/pay:
-    post:
+    get:
       tags:
         - Order
       summary: User can pay order
