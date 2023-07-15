@@ -43,7 +43,8 @@ export class PaymentController {
 
       if (hash === req.headers['x-paystack-signature']) {
         const event = req.body;
-        if (event.length !== 0 && event.event === 'paymentrequest.success') {
+        if (event.length !== 0 && event.event === 'charge.success') {
+          console.log(event.data.id);
           return res.status(200).json({ status: 'success', message: 'Transfer successful' });
         }
       }
