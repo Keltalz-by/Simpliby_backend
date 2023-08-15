@@ -44,6 +44,9 @@ export class User {
   @prop({ default: 'user' })
   public role: string;
 
+  @prop({ default: false })
+  public isSeller: boolean;
+
   @prop()
   public occupation: string;
 

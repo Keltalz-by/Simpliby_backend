@@ -138,7 +138,7 @@ export class AuthService {
       let tokenExpiration: any = new Date();
       tokenExpiration = tokenExpiration.setMinutes(tokenExpiration.getMinutes() + 20);
 
-      await OTPModel.create({ owner: userId, code: newOtp, expiration: tokenExpiration });
+      await OTPModel.create({ owner: userId, code: newOtp, expiration: tokenExpiration, type: 'Email Verification' });
       return await sendOtpVerificationMail(user.name, user.email, newOtp);
     }
     throw new AppError(404, 'User not found');

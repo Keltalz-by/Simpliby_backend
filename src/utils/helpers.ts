@@ -56,8 +56,8 @@ export function otpGenerator(length?: number, options?: IOptions) {
 export const createOtp = (): string => {
   const newOtp: string = otpGenerator(4, {
     digits: true,
-    lowerCaseAlphabets: true,
-    upperCaseAlphabets: true,
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
     specialChars: false
   });
   return newOtp;

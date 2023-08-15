@@ -1,6 +1,6 @@
 tags:
   - name: Auth
-    description: Everything about managing buyers
+    description: Everything about managing users
   - name: Store
     description: Everything about creating and owning a store
   - name: Product
@@ -29,19 +29,48 @@ paths:
               $ref: '#/components/schemas/RegisterUser'
 
       responses:
-        '201':
+        201:
           description: Successful operation
-        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User created successfully. Check your email for verification code
+                  data:
+                    type: string
+                    example: 64a1ec2412844224b6bfe154
+        400:
           description: Bad request
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
                   success:
                     type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid email format
+        409:
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User already exist
 
   /auth/verify:
     post:
@@ -60,15 +89,50 @@ paths:
               properties:
                 userId:
                   type: string
+                  example: 64a1ec2412844224b6bfe154
                 otp:
                   type: string
+                  example: 1352
       responses:
-        '200':
+        200:
           description: Successful operation
-        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User verified successfully
+        400:
           description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid OTP
         '500':
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
 
   /auth/resendotp:
     post:
@@ -87,15 +151,63 @@ paths:
               properties:
                 userId:
                   type: string
+                  example: 64a1ec2412844224b6bfe154
                 email:
                   type: string
+                  example: johndoe@example.com
       responses:
-        '200':
+        200:
           description: Successful operation
-        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: OTP resent successfully. Check your email for the new OTP.
+        400:
           description: Bad request
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User already verified
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User not found
+        500:
           description: Interal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
 
   /auth/login:
     post:
@@ -405,7 +517,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-          
+
     get:
       tags:
         - Product
@@ -420,8 +532,7 @@ paths:
         '500':
           description: Internal server error
 
-
- #################
+  #################
   # User API #
   #################
 
@@ -594,7 +705,6 @@ paths:
           description: Forbidden
         '500':
           description: Internal server error
-
 
   #################
   # ToBuy API #
