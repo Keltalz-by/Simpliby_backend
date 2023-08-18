@@ -4,7 +4,7 @@ import { AppError, cloudinary, uploadToCloudinary } from '../../utils';
 import { StoreService } from './store.service';
 import { UserService } from '../user/user.service';
 // import { type Store } from './store.model';
-import { type SearchStoreInput, type VerifyStoreInput, type UpdateStoreInput } from './store.schema';
+import { type SearchStoreInput, type UpdateStoreInput } from './store.schema';
 import { type ICreateStore } from './store.interface';
 // import _ from 'lodash';
 
@@ -46,17 +46,6 @@ export class StoreController {
         message: 'Store created successfully.',
         data: store
       });
-    } catch (error: any) {
-      next(error);
-    }
-  };
-
-  public verifyStore = async (req: Request<VerifyStoreInput>, res: Response, next: NextFunction) => {
-    try {
-      const { storeId } = req.params;
-      await this.storeService.verifyStore(storeId);
-
-      res.status(200).json({ status: true, message: 'Store verified successfully.' });
     } catch (error: any) {
       next(error);
     }

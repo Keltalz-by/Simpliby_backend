@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 import * as mongoose from 'mongoose';
-import { AppError, sendMail, storeVerifiedTemplate } from '../../utils';
+import { AppError } from '../../utils';
 import StoreModel from '../store/store.model';
 import { type ICreateStore, type IStore, type IUpdateStore } from './store.interface';
 import UserModel from '../user/user.model';
@@ -18,48 +18,18 @@ export class StoreService {
       throw new AppError(404, `User with ID ${storeData.owner} does not exist`);
     }
 
+    if (user.isSeller) {
+      throw new AppError(400, `User already have a store`);
+    }
+
     if (store !== null) {
       throw new AppError(409, `Store with business name ${storeData.businessName} already exist`);
     }
 
     const newStore = await (await StoreModel.create(storeData)).populate('owner', 'name');
-
-    if (user.role !== 'seller') {
-      await user.updateOne({ $set: { role: 'seller' } });
-    }
+    await user.updateOne({ $set: { isSeller: true, role: 'seller' } });
 
     return newStore;
-  }
-
-  public async verifyStore(storeId: string) {
-    if (!mongoose.Types.ObjectId.isValid(storeId)) {
-      throw new AppError(400, 'Invalid store ID.');
-    }
-    const store = await StoreModel.findOne({ _id: storeId });
-
-    if (store === null) {
-      throw new AppError(404, 'Store not found.');
-    }
-
-    const user = await UserModel.findOne({ _id: store.owner });
-
-    if (user === null) {
-      throw new AppError(404, 'User not found.');
-    }
-
-    if (store.isStoreVerified) {
-      throw new AppError(400, 'Store already verified.');
-    }
-
-    await StoreModel.updateOne(
-      { _id: storeId },
-      {
-        $set: { isStoreVerified: true }
-      }
-    );
-
-    const message = storeVerifiedTemplate(store.businessName);
-    return await sendMail(user.email, 'Store Verification Successful', message);
   }
 
   public async updateStore(storeData: IUpdateStore) {

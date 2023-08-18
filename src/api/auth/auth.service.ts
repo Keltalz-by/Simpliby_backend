@@ -8,7 +8,6 @@ import {
   createOtp,
   emailVerifiedPasswordTemplate,
   emailVerifiedTemplate,
-  otpGenerator,
   passwordResetCompleteTemplate,
   sendMail,
   sendOtpVerificationMail,
@@ -155,12 +154,7 @@ export class AuthService {
       throw new AppError(400, 'User not verified. Check your email for verification code or request for a new code.');
     }
 
-    const newOtp: string = otpGenerator(4, {
-      digits: true,
-      lowerCaseAlphabets: true,
-      upperCaseAlphabets: true,
-      specialChars: false
-    });
+    const newOtp: string = createOtp();
 
     let tokenExpiration: any = new Date();
     tokenExpiration = tokenExpiration.setMinutes(tokenExpiration.getMinutes() + 20);

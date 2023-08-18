@@ -46,8 +46,6 @@ storeRoute.patch(
   store.updateStore
 );
 
-storeRoute.patch(`${path}/:storeId`, deserializeUser, requireUser, restrictUser('admin'), store.verifyStore);
-
 storeRoute.post(
   `${path}/:storeId/orders`,
   deserializeUser,

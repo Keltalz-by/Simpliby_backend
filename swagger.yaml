@@ -224,12 +224,69 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginUser'
       responses:
-        '200':
+        200:
           description: Successful operation
-        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged in successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 64a1ec2412844224b6bfe154
+                      name:
+                        type: string
+                        example: John Doe
+                      email:
+                        type: string
+                        example: john.doe@gmail.com
+                      isEmailVerified:
+                        type: boolean
+                        example: true
+                      role:
+                        type: string
+                        example: user
+                      isSeller:
+                        type: boolean
+                        example: false
+                      followings:
+                        type: array
+                        example: []
+        400:
           description: Bad request
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid email or password
+        500:
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example:
 
   /auth/refresh:
     get:
@@ -263,14 +320,58 @@ paths:
                   type: string
 
       responses:
-        '200':
+        200:
           description: Successful operation
-        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Check your email for reset OTP
+        400:
           description: Bad request
-        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User not verified
+        404:
           description: Not found
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User does not exist
+        500:
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example:
 
   /auth/resetpassword:
     patch:
@@ -295,12 +396,45 @@ paths:
                   type: string
 
       responses:
-        '200':
+        200:
           description: Successful operation
-        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password reset successful. Procees to login
+        400:
           description: Bad request
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Passwords are not the same
+        500:
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example:
 
   /auth/logout:
     get:
@@ -310,12 +444,45 @@ paths:
       description: Logout user
       operationId: logoutUser
       responses:
-        '204':
+        200:
           description: Successful operation
-        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged out successfully
+        401:
           description: Unauthorized
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: You are not logged in
+        500:
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example:
 
   #################
   # Store API #
