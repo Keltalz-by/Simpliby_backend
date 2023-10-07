@@ -7,9 +7,9 @@ tags:
     description: Everything about creating and managing a product
   - name: Order
     description: Everything about creating and managing orders
-  - name: ToBuy
-    description: Everything about creating and managing to-buy list
-  - name: Cart
+  # - name: ToBuy
+  #   description: Everything about creating and managing to-buy list
+  # - name: Cart
     description: Everything about creating and managing user cart
   - name: Category
     description: Everything about creating and managing category
