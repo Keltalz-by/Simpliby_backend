@@ -4,15 +4,15 @@ tags:
   - name: Store
     description: Everything about creating and owning a store
   - name: Product
-    description: Everything about creating and managing a product
+    description: Everything about creating and managing a 
+  - name: Category
+    description: Everything about creating and managing category
   - name: Order
     description: Everything about creating and managing orders
   # - name: ToBuy
   #   description: Everything about creating and managing to-buy list
   # - name: Cart
-    description: Everything about creating and managing user cart
-  - name: Category
-    description: Everything about creating and managing category
+  #   description: Everything about creating and managing user cart
 
 paths:
   /auth/register:
