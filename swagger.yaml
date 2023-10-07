@@ -11,6 +11,8 @@ tags:
     description: Everything about creating and managing to-buy list
   - name: Cart
     description: Everything about creating and managing user cart
+  - name: Category
+    description: Everything about creating and managing category
 
 paths:
   /auth/register:
@@ -698,6 +700,47 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+
+  #################
+  # Category API #
+  #################
+
+  /categories:
+    get:
+      tags:
+        - Category
+      summary: Get all categories
+      description: Endpoint to get all categories
+      opeartionId: allCategories
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /categories/{categoryId}/products:
+    get:
+      tags:
+        - Category
+      summary: Get products in a category
+      description: Get all the products taht belong to a category
+      operationId: categoryProducts
+      parameters:
+        - name: id
+          in: path
+          description: category id of roducts to get
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
 
   #################
   # User API #

@@ -5,7 +5,7 @@ import { CategoryController } from './category.controller';
 import { createCategorySchema } from './category.schema';
 
 export const categoryRoute = Router();
-const path = '/category';
+const path = '/categories';
 const category = new CategoryController();
 
 categoryRoute.get(`${path}`, category.getAllCategory);

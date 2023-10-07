@@ -55,16 +55,16 @@ export class Store {
   public isStoreVerified: boolean;
 
   @prop({ default: 0 })
-  public balance: number;
-
-  @prop({ default: 0 })
-  public amountWithdrawn: number;
+  public amountSold: number;
 
   @prop({ default: 'FREE' })
   public plan: string;
 
   @prop({ default: [] })
   public buyersVisited: string[];
+
+  @prop({ default: [] })
+  public numberOfTimesVisited: string[];
 }
 
 const StoreModel = getModelForClass(Store);

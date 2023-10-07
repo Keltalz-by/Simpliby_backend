@@ -38,7 +38,7 @@ export class CategoryController {
     try {
       const { categoryId } = req.params;
       const products = await this.categoryService.getProductsInCategory(categoryId);
-      return res.status(200).json({ success: true, data: products });
+      res.status(200).json({ success: true, data: products });
     } catch (error: any) {
       next(error);
     }
