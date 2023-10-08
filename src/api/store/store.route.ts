@@ -58,3 +58,4 @@ storeRoute.patch(`${path}/:storeId/follow`, deserializeUser, requireUser, restri
 storeRoute.patch(`${path}/:storeId/unfollow`, deserializeUser, requireUser, restrictUser('user'), user.unfollowStore);
 storeRoute.post(`${path}/search`, deserializeUser, requireUser, validateResource(searchStoreSchema), store.searchStore);
 storeRoute.get(`${path}`, deserializeUser, requireUser, store.findAllStores);
+storeRoute.get(`${path}/:storeId`, deserializeUser, requireUser, store.findStore);

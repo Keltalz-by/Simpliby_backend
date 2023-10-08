@@ -48,7 +48,7 @@ export class ProductController {
     try {
       const products = await this.productService.getAllProductsInCategory();
 
-      return res.status(200).json({ count: products.length, success: true, data: products });
+      res.status(200).json({ count: products.length, success: true, data: products });
     } catch (err: any) {
       next(err);
     }
@@ -59,7 +59,7 @@ export class ProductController {
       const { page, limit } = req.query as any;
       const products = await this.productService.getAllProducts({ page, limit });
 
-      return res.status(200).json({ success: true, data: products, count: products.length });
+      res.status(200).json({ success: true, data: products, count: products.length });
     } catch (err: any) {
       next(err);
     }

@@ -58,7 +58,7 @@ export class StoreService {
   }
 
   public async findAllStores() {
-    return await StoreModel.find({}).orFail().exec();
+    return await StoreModel.find({});
   }
 
   public async searchStore(name: string) {

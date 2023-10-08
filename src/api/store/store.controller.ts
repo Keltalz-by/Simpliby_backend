@@ -108,7 +108,7 @@ export class StoreController {
     }
   };
 
-  public findStore = async (req: Request, _res: Response, next: NextFunction) => {
+  public findStore = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const storeId = req.params.storeId;
 
@@ -117,6 +117,8 @@ export class StoreController {
       if (store === null) {
         next(new AppError(404, 'Store not found'));
       }
+
+      res.status(200).json({ success: true, data: store });
     } catch (err: any) {
       next(err);
     }

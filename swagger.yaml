@@ -513,16 +513,31 @@ paths:
         '500':
           description: Internal server error
 
-  /stores/{storeId}:
-    patch:
+    get:
       tags:
         - Store
-      summary: Admin can verify a store
-      operationId: verifyStore
+      summary: Get all stores
+      description: Get all the stores
+      operationId: getAllStores
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /stores/{storeId}:
+    get:
+      tags:
+        - Store
+      summary: Get a store
+      description: Get a single store profile
+      operationId: getStore
       parameters:
-        - name: storeId
+        - name: id
           in: path
-          description: ID of store to verify
+          description: id of store to get
           required: true
           schema:
             type: string
@@ -531,12 +546,8 @@ paths:
           description: Successful operation
         '401':
           description: Unauthorized
-        '403':
-          description: Forbidden
         '404':
           description: Not Found
-        '500':
-          description: Internal Server Error
 
   /stores/{storeId}/follow:
     patch:
