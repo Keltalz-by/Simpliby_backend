@@ -11,8 +11,8 @@ tags:
     description: Everything about creating and managing orders
   # - name: ToBuy
   #   description: Everything about creating and managing to-buy list
-  # - name: Cart
-  #   description: Everything about creating and managing user cart
+  - name: Cart
+    description: Everything about creating and managing user cart
 
 paths:
   /auth/register:
@@ -784,6 +784,90 @@ paths:
           description: Not Found
 
   #################
+  # Cart API #
+  #################
+
+  /carts:
+    post:
+      tags:
+        - Cart
+      summary: Add product to cart
+      operationId: AddToCart
+      requestBody:
+        description: Add product to cart
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCart'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+
+    get:
+      tags:
+        - Cart
+      summary: Get user cart
+      operationId: GetUserCart
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+
+    delete:
+      tags:
+        - Cart
+      summary: Delete user cart
+      operationId: DeleteUserCart
+      responses:
+        '204':
+          description: Success
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+
+  /carts/{productId}:
+    patch:
+      tags:
+        - Cart
+      summary: Remove product from cart
+      description: Remove product from user's cart
+      operationId: RemoveProductFromCart
+      parameters:
+        - name: productId
+          in: path
+          description: product id of product to remove
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+
+  #################
   # Order API #
   #################
 
@@ -1090,6 +1174,19 @@ components:
         logo:
           type: string
           format: binary
+    
+    AddToCart:
+      required:
+        - productId
+        - quantity
+      type: object
+      properties:
+        productId:
+          type: string
+          example: 6446f19928ovb6637824c57g
+        quantity:
+          type: integer
+          example: 2
     # CreateToBuy:
     #   type: array
     #   items:

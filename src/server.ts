@@ -6,7 +6,6 @@ import { storeRoute } from './api/store/store.route';
 import { categoryRoute } from './api/category/category.route';
 import { productRoute } from './api/product/product.route';
 import { orderRoute } from './api/order/order.route';
-// import { ToBuyRoute } from './api/toBuy/toBuy.route';
 import { cartRoute } from './api/cart/cart.route';
 import { paymentRoute } from './api/payment/payment.route';
 
@@ -21,7 +20,6 @@ const app = new App([
   categoryRoute,
   productRoute,
   orderRoute
-  // new ToBuyRoute(),
 ]);
 
 // const app = new App([

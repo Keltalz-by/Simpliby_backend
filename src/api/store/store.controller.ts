@@ -2,17 +2,17 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import { AppError, cloudinary, uploadToCloudinary } from '../../utils';
 import { StoreService } from './store.service';
-import StoreModel from './store.model';
+// import StoreModel from './store.model';
 import { UserService } from '../user/user.service';
 import { type SearchStoreInput, type UpdateStoreInput } from './store.schema';
 import { type ICreateStore } from './store.interface';
-import { APIFeatures } from '../../common';
+// import { APIFeatures } from '../../common';
 // import _ from 'lodash';
 
 export class StoreController {
   public storeService = new StoreService();
   public userService = new UserService();
-  public apiFeatures = new APIFeatures(StoreModel, {});
+  // public apiFeatures = new APIFeatures(StoreModel, {});
 
   public createStore = async (req: Request<{}, {}, ICreateStore>, res: Response, next: NextFunction) => {
     try {
@@ -101,7 +101,7 @@ export class StoreController {
   public findAllStores = async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const stores = await this.storeService.findAllStores();
-      console.log(this.apiFeatures);
+      // console.log(this.apiFeatures);
       res.status(200).json({ success: true, data: stores });
     } catch (err: any) {
       next(err);
