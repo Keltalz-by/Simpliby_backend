@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { type Request, type Response, type NextFunction } from 'express';
-import { AppError, cloudinary, uploadToCloudinary } from '../../utils';
+import { cloudinary, uploadToCloudinary } from '../../utils';
 import { StoreService } from './store.service';
 // import StoreModel from './store.model';
 import { UserService } from '../user/user.service';
@@ -113,10 +113,6 @@ export class StoreController {
       const storeId = req.params.storeId;
 
       const store = await this.storeService.findStoreById(storeId);
-
-      if (store === null) {
-        next(new AppError(404, 'Store not found'));
-      }
 
       res.status(200).json({ success: true, data: store });
     } catch (err: any) {

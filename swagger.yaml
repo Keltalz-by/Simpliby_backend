@@ -535,7 +535,7 @@ paths:
       description: Get a single store profile
       operationId: getStore
       parameters:
-        - name: id
+        - name: storeId
           in: path
           description: id of store to get
           required: true
