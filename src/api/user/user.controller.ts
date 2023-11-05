@@ -21,7 +21,7 @@ export class UserController {
 
       const data = await this.userService.findUser({ _id: user._id });
 
-      return res.status(200).json({ success: true, data });
+      res.status(200).json({ success: true, data });
     } catch (error: any) {
       next(error);
     }

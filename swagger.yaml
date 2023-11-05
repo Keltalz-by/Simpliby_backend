@@ -4,7 +4,7 @@ tags:
   - name: Store
     description: Everything about creating and owning a store
   - name: Product
-    description: Everything about creating and managing a 
+    description: Everything about creating and managing a product 
   - name: Category
     description: Everything about creating and managing category
   - name: Order
@@ -659,7 +659,7 @@ paths:
       description: A seller can create a new product
       operationId: createProduct
       requestBody:
-        description: Create a new store
+        description: Create a new product
         content:
           multipart/form-data:
             schema:
@@ -1123,6 +1123,7 @@ components:
           example: 12345678
     CreateStore:
       required:
+        - owner
         - businessName
         - businessLocation
         - description
@@ -1133,6 +1134,9 @@ components:
         - logo
       type: object
       properties:
+        owner:
+          type: string
+          example: 6446f19928ovb6637824c57g
         businessName:
           type: string
           example: Janee Clothings
