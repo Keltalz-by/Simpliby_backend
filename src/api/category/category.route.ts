@@ -8,7 +8,7 @@ export const categoryRoute = Router();
 const path = '/categories';
 const category = new CategoryController();
 
-categoryRoute.get(`${path}`, category.getAllCategory);
+// categoryRoute.get(`${path}`, category.getAllCategory);
 categoryRoute.get(`${path}/:categoryId/products`, category.getAllProductsInCategory);
 categoryRoute.post(
   `${path}`,

@@ -75,11 +75,18 @@ export class UserService {
   }
 
   public async updateUser(userId: string, options: object) {
-    return await UserModel.updateOne(
+    const user = await UserModel.findOne({ _id: userId });
+
+    if (user === null) {
+      throw new AppError(404, 'User not found');
+    }
+
+    return await UserModel.findByIdAndUpdate(
       { _id: userId },
       {
         $set: options
-      }
+      },
+      { new: true }
     );
   }
 }

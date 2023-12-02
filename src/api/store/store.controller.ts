@@ -4,44 +4,52 @@ import { cloudinary, uploadToCloudinary } from '../../utils';
 import { StoreService } from './store.service';
 // import StoreModel from './store.model';
 import { UserService } from '../user/user.service';
-import { type SearchStoreInput, type UpdateStoreInput } from './store.schema';
-import { type ICreateStore } from './store.interface';
+import { type UpdateStoreInput, type CreateStoreInput, type SearchStoreInput } from './store.schema';
+// import { type ICreateStore } from './store.interface';
+// import { type ICreateStore } from './store.interface';
 // import { APIFeatures } from '../../common';
 // import _ from 'lodash';
 
 export class StoreController {
-  public storeService = new StoreService();
-  public userService = new UserService();
+  private readonly storeService = new StoreService();
+  private readonly userService = new UserService();
   // public apiFeatures = new APIFeatures(StoreModel, {});
 
-  public createStore = async (req: Request<{}, {}, ICreateStore>, res: Response, next: NextFunction) => {
+  public createStore = async (req: Request<{}, {}, CreateStoreInput>, res: Response, next: NextFunction) => {
     try {
-      const userId: string = res.locals.user._id;
-      const storeData: ICreateStore = req.body;
+      const owner: string = res.locals.user.id;
+      const storeData = req.body;
 
-      const allImages = req.files as Express.Multer.File[];
+      const files = req.files as Express.Multer.File[];
 
-      for (const key of Object.keys(allImages)) {
+      console.log(storeData);
+      console.log('owner', owner);
+
+      console.log(files);
+
+      for (const key of Object.keys(files)) {
         if (key === 'storeImage') {
           // @ts-expect-error not really an error
-          for (const file of allImages[key]) {
+          for (const file of files[key]) {
             const path: string = file.path;
-            const image = await uploadToCloudinary(path, 'Store-Image');
-            storeData.storeImage = image;
+            const storeImage = await uploadToCloudinary(path, 'Store-Image');
+            storeData.storeImage = storeImage;
           }
         }
 
         if (key === 'logo') {
           // @ts-expect-error not really an error
-          for (const file of allImages[key]) {
+          for (const file of files[key]) {
             const path: string = file.path;
-            const image = await uploadToCloudinary(path, 'Store-Logo');
-            storeData.logo = image;
+            const logoImage = await uploadToCloudinary(path, 'Logo-Image');
+            storeData.logo = logoImage;
           }
         }
       }
 
-      const store = await this.storeService.createStore({ ...storeData, owner: userId });
+      console.log(storeData);
+
+      const store = await this.storeService.createStore(storeData, owner);
 
       res.status(201).json({
         success: true,
@@ -55,11 +63,11 @@ export class StoreController {
 
   public updateStore = async (req: Request<{}, {}, UpdateStoreInput>, res: Response, next: NextFunction) => {
     try {
-      const storeId: string = res.locals.store._id;
+      const userId: string = res.locals.user._id;
       const update = req.body;
       const allImages = req.files as Express.Multer.File[];
 
-      const store = await this.storeService.findStoreById(storeId);
+      const store = await this.storeService.findStore({ owner: userId });
       const storeImageId = store.storeImage.publicId;
       const storeLogoId = store.logo.publicId;
 
@@ -91,17 +99,27 @@ export class StoreController {
         }
       }
 
-      await this.storeService.updateStore({ ...update, storeId });
+      await this.storeService.updateStore({ ...update, userId });
       res.status(200).json({ success: true, message: 'Store updated successfully' });
     } catch (error: any) {
       next(error);
     }
   };
 
-  public findAllStores = async (_req: Request, res: Response, next: NextFunction) => {
+  // public findAllStores = async (_req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const stores = await this.storeService.findAllStores();
+  //     // console.log(this.apiFeatures);
+  //     res.status(200).json({ success: true, data: stores });
+  //   } catch (err: any) {
+  //     next(err);
+  //   }
+  // };
+
+  public findAllStores = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const stores = await this.storeService.findAllStores();
-      // console.log(this.apiFeatures);
+
       res.status(200).json({ success: true, data: stores });
     } catch (err: any) {
       next(err);

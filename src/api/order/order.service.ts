@@ -47,7 +47,7 @@ export class OrderService {
       return await order.save();
     }
 
-    if (product.storeId !== storeId) {
+    if (String(product.storeId) !== storeId) {
       throw new AppError(400, 'You can only shop for products in this store');
     }
 

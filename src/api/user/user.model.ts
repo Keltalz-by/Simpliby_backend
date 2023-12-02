@@ -5,6 +5,8 @@ import { AppError } from '../../utils';
 export const privateFields = ['__v', 'password', 'createdAt', 'updatedAt'];
 
 @pre<User>('save', async function (next) {
+  this.id = this._id;
+
   if (!this.isModified('password')) {
     return;
   }
@@ -23,35 +25,38 @@ export const privateFields = ['__v', 'password', 'createdAt', 'updatedAt'];
   }
 })
 export class User {
+  @prop()
+  id: string;
+
   @prop({ required: true })
-  public name: string;
+  name: string;
 
   @prop({ required: true, unique: true })
-  public email: string;
+  email: string;
 
   @prop({ required: true })
-  public password: string;
+  password: string;
 
   @prop({ default: false })
-  public isEmailVerified: boolean;
+  isEmailVerified: boolean;
 
-  @prop()
-  public phone: string;
+  @prop({ default: '+234' })
+  phone: string;
 
-  @prop()
-  public location: string;
+  @prop({ default: 'location' })
+  location: string;
 
-  @prop({ default: 'user' })
-  public role: string;
+  @prop({ default: 'buyer' })
+  role: string;
 
   @prop({ default: false })
-  public isSeller: boolean;
+  isSeller: boolean;
 
-  @prop()
-  public occupation: string;
+  @prop({ default: 'what do you do?' })
+  occupation: string;
 
   @prop({ default: [] })
-  public followings: string[];
+  followings: string[];
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {
     try {

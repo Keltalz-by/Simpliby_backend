@@ -1,4 +1,5 @@
 // import { AppError } from '../utils';
+import { AppError } from '../utils';
 import { type Request, type Response, type NextFunction } from 'express';
 
 export const requireUser = (_req: Request, res: Response, next: NextFunction) => {
@@ -6,7 +7,7 @@ export const requireUser = (_req: Request, res: Response, next: NextFunction) =>
     const user = res.locals.user;
 
     if (user === null) {
-      next();
+      next(new AppError(401, 'Invalid token or session expired'));
       return;
     }
 

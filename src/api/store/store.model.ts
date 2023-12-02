@@ -1,7 +1,11 @@
-import { Severity, getModelForClass, modelOptions, prop, Ref } from '@typegoose/typegoose';
+import { Severity, getModelForClass, modelOptions, prop, Ref, pre } from '@typegoose/typegoose';
 import { IGallery } from '../../common';
-import { type User } from '../user/user.model';
+import { User } from '../user/user.model';
 
+@pre<Store>('save', function (next) {
+  this.id = this._id;
+  next();
+})
 @modelOptions({
   schemaOptions: {
     collection: 'stores',
@@ -12,59 +16,59 @@ import { type User } from '../user/user.model';
   }
 })
 export class Store {
-  @prop({ ref: 'User', type: () => String, required: true })
-  public owner: Ref<User>;
+  @prop()
+  id: string;
+
+  @prop({ ref: () => User, required: true })
+  owner: Ref<User>;
 
   @prop({ required: true, unique: true })
-  public businessName: string;
+  businessName: string;
 
   @prop({ required: true })
-  public businessLocation: string;
+  businessLocation: string;
 
   @prop()
-  public phone: string;
+  phone: string;
 
   @prop()
-  public description: string;
+  description: string;
 
   @prop()
-  public address: string;
+  address: string;
 
   @prop()
-  public city: string;
+  city: string;
 
   @prop({ default: 'Nigeria' })
-  public country: string;
+  country: string;
 
   @prop()
-  public storeImage: IGallery;
+  storeImage: IGallery;
 
   @prop()
-  public logo: IGallery;
+  logo: IGallery;
 
   @prop()
-  public website: string;
+  website: string;
 
   @prop()
-  public businessHours: string;
+  businessHours: string;
 
   @prop({ default: [] })
-  public followers: string[];
+  followers: string[];
 
   @prop({ default: false })
-  public isStoreVerified: boolean;
+  isStoreVerified: boolean;
 
   @prop({ default: 0 })
-  public amountSold: number;
-
-  @prop({ default: 'FREE' })
-  public plan: string;
+  amountSold: number;
 
   @prop({ default: [] })
-  public buyersVisited: string[];
+  buyersVisited: string[];
 
   @prop({ default: [] })
-  public numberOfTimesVisited: string[];
+  numberOfTimesVisited: string[];
 }
 
 const StoreModel = getModelForClass(Store);

@@ -8,17 +8,21 @@ import { upload } from '../../utils';
 import { OrderController } from '../order/order.controller';
 import { createOrderSchema } from '../order/order.schema';
 import { UserController } from '../user/user.controller';
+import { CategoryController } from '../category/category.controller';
 
 export const storeRoute = Router();
 const path = '/stores';
 const order = new OrderController();
 const user = new UserController();
 const store = new StoreController();
+const category = new CategoryController();
 
 storeRoute.post(
   `${path}`,
+
   deserializeUser,
   requireUser,
+  restrictUser('buyer'),
   [
     upload.fields([
       { name: 'storeImage', maxCount: 1 },
@@ -38,7 +42,7 @@ storeRoute.patch(
   restrictUser('seller'),
   [
     upload.fields([
-      { name: 'storeImage', maxCount: 2 },
+      { name: 'storeImage', maxCount: 1 },
       { name: 'logo', maxCount: 1 }
     ]),
     multerErrorHandler
@@ -59,3 +63,10 @@ storeRoute.patch(`${path}/:storeId/unfollow`, deserializeUser, requireUser, rest
 storeRoute.post(`${path}/search`, deserializeUser, requireUser, validateResource(searchStoreSchema), store.searchStore);
 storeRoute.get(`${path}`, deserializeUser, requireUser, store.findAllStores);
 storeRoute.get(`${path}/:storeId`, deserializeUser, requireUser, store.findStore);
+storeRoute.get(`${path}/:storeId/categories`, deserializeUser, requireUser, category.getAllStoreCategories);
+storeRoute.get(
+  `${path}/:storeId/categories/:categoryId/products`,
+  deserializeUser,
+  requireUser,
+  category.getAllProductsInCategory
+);

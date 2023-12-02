@@ -2,6 +2,10 @@ import { type Request, type Response, type NextFunction } from 'express';
 import { Types } from 'mongoose';
 import { UserService } from './user.service';
 import { AppError } from '../../utils';
+import _ from 'lodash';
+import { type UpdateProfileInput } from './user.schema';
+
+const profileDataNotNeeded = ['isEmailVerified', 'role', 'isSeller', '_id'];
 
 export class UserController {
   public userService = new UserService();
@@ -9,7 +13,7 @@ export class UserController {
   public getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const users = await this.userService.findAllUsers();
-      return res.status(200).json({ success: true, data: users });
+      res.status(200).json({ success: true, data: users });
     } catch (err: any) {
       next(err);
     }
@@ -19,9 +23,22 @@ export class UserController {
     try {
       const user = res.locals.user;
 
-      const data = await this.userService.findUser({ _id: user._id });
+      const profile = _.omit(user.toJSON(), profileDataNotNeeded);
 
-      res.status(200).json({ success: true, data });
+      res.status(200).json({ success: true, data: profile });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  public updateUserProfile = async (req: Request<{}, {}, UpdateProfileInput>, res: Response, next: NextFunction) => {
+    try {
+      const user = res.locals.user;
+      const profileData = req.body;
+
+      await this.userService.updateUser(user.id, profileData);
+
+      res.status(200).json({ success: true, message: 'Profile updated successfully' });
     } catch (error: any) {
       next(error);
     }

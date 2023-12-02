@@ -23,7 +23,9 @@ const payload = {
     currency: string().optional(),
     itemLocation: string().optional(),
     inStock: string().optional(),
-    productImages: any(),
+    productImages: any({
+      required_error: 'Product Images are required'
+    }),
     productRackImage: any().optional()
   })
 };

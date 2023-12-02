@@ -1,6 +1,6 @@
 import { any, object, string, type TypeOf } from 'zod';
 
-const payload = {
+export const createStoreSchema = object({
   body: object({
     businessName: string({
       required_error: 'Business Name is required'
@@ -27,10 +27,6 @@ const payload = {
       required_error: 'Upload your store logo'
     })
   })
-};
-
-export const createStoreSchema = object({
-  ...payload
 });
 
 const params = {
@@ -62,22 +58,11 @@ export const updateStoreSchema = object({
       required_error: 'Country is required'
     }),
     storeImage: any({
-      required_error: 'Upload aan image of your store'
+      required_error: 'Upload an image of your store'
     }),
     logo: any({
       required_error: 'Upload your store logo'
     })
-  })
-});
-
-export const resendOTPSchema = object({
-  body: object({
-    storeId: string({
-      required_error: 'Store ID is required'
-    }),
-    email: string({
-      required_error: 'Email is required'
-    }).email('Invalid email format')
   })
 });
 
@@ -92,25 +77,4 @@ export const searchStoreSchema = object({
 export type CreateStoreInput = TypeOf<typeof createStoreSchema>['body'];
 export type VerifyStoreInput = TypeOf<typeof verifyStoreSchema>['params'];
 export type UpdateStoreInput = TypeOf<typeof updateStoreSchema>['body'];
-export type ResendStoreOTPInput = TypeOf<typeof resendOTPSchema>['body'];
 export type SearchStoreInput = TypeOf<typeof searchStoreSchema>['body'];
-
-// storeImages: object({
-//       url: string({
-//         required_error: 'Image url is required'
-//       }),
-//       publicId: string({
-//         required_error: 'Image id is required'
-//       })
-//     })
-//       .array()
-//       .optional(),
-//     logo: object({
-//       url: string({
-//         required_error: 'Image url is required'
-//       }),
-//       publicId: string({
-//         required_error: 'Image id is required'
-//       })
-//     }).optional()
-//   })

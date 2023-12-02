@@ -1,6 +1,7 @@
 import { modelOptions, prop, Severity, getModelForClass, Ref } from '@typegoose/typegoose';
 import { Category } from '../category/category.model';
 import { Store } from '../store/store.model';
+import { IGallery } from '../../common';
 
 @modelOptions({
   schemaOptions: {
@@ -37,10 +38,10 @@ export class Product {
   public reservationPrice: string;
 
   @prop({ required: true })
-  public productImages: [];
+  public productImages: IGallery[];
 
   @prop()
-  public productRackImage?: object;
+  public productRackImage?: IGallery;
 
   @prop({ default: true })
   public inStock?: boolean;

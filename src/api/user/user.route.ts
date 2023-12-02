@@ -9,8 +9,10 @@ const path = '/users';
 const user = new UserController();
 
 userRoute.get(`${path}/profile`, deserializeUser, requireUser, user.getUserProfile);
+userRoute.patch(`${path}/profile/update`, deserializeUser, requireUser, user.updateUserProfile);
 userRoute.delete(`${path}/:userId`, deserializeUser, requireUser, restrictUser('user'), user.deleteUser);
-userRoute.get(`${path}`, deserializeUser, requireUser, restrictUser('admin'), user.getAllUsers);
+userRoute.get(`${path}`, user.getAllUsers);
+// userRoute.get(`${path}`, deserializeUser, requireUser, restrictUser('admin'), user.getAllUsers);
 
 // export class UserRoute {
 //   public path: '/users/';

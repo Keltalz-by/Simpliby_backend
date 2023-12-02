@@ -2,17 +2,16 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import { ProductService } from './product.service';
 import { StoreService } from '../store/store.service';
-// import { type CreateProductInput } from './product.schema';
-import { uploadToCloudinary } from '../../utils';
-import { type IProduct } from './product.interface';
+import { type CreateProductInput } from './product.schema';
+import { cloudinary, uploadToCloudinary } from '../../utils';
 
 export class ProductController {
   public productService = new ProductService();
   public storeService = new StoreService();
 
-  public createProduct = async (req: Request<{}, {}, IProduct>, res: Response, next: NextFunction) => {
+  public createProduct = async (req: Request<{}, {}, CreateProductInput>, res: Response, next: NextFunction) => {
     try {
-      const productData: IProduct = req.body;
+      const productData = req.body;
       const allImages = req.files as Express.Multer.File[];
 
       productData.productImages = [];
@@ -60,6 +59,44 @@ export class ProductController {
       const products = await this.productService.getAllProducts({ page, limit });
 
       res.status(200).json({ success: true, data: products, count: products.length });
+    } catch (err: any) {
+      next(err);
+    }
+  };
+
+  public getSingleProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { productId } = req.params;
+      const product = await this.productService.getSingleProduct(productId);
+
+      res.status(200).json({ success: true, data: product });
+    } catch (err: any) {
+      next(err);
+    }
+  };
+
+  public deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId: string = res.locals.user._id;
+      const { productId } = req.params;
+
+      const product = await this.productService.getSingleProduct(productId);
+      const productImages = product.productImages;
+      const rackImage = product.productRackImage;
+
+      const imageIds = productImages.map((image) => image.publicId);
+
+      for (const id of imageIds) {
+        await cloudinary.uploader.destroy(id);
+      }
+
+      if (rackImage !== undefined) {
+        await cloudinary.uploader.destroy(rackImage.publicId);
+      }
+
+      await this.productService.deleteProduct(productId, userId);
+
+      res.status(200).json({ success: true, message: 'Product deleted successfully' });
     } catch (err: any) {
       next(err);
     }

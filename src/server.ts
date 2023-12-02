@@ -22,15 +22,4 @@ const app = new App([
   orderRoute
 ]);
 
-// const app = new App([
-//   new AuthRoute(),
-//   new OrderRoute(),
-//   new StoreRoute(),
-// new ProductRoute(),
-// new CartRoute(),
-// new ToBuyRoute(),
-// new UserRoute(),
-// new CategoryRoute()
-// ]);
-
 app.listen();

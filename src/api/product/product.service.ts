@@ -4,6 +4,7 @@ import CategoryModel from '../category/category.model';
 import StoreModel from '../store/store.model';
 import ProductModel, { type Product } from './product.model';
 import { type QueryObj } from '../../common';
+import { Types } from 'mongoose';
 
 // type QueryObj = Record<string, string
 export class ProductService {
@@ -17,10 +18,6 @@ export class ProductService {
 
     if (store === null) {
       throw new AppError(404, 'Store does not exist');
-    }
-
-    if (productData.productImages.length === 0) {
-      throw new AppError(400, 'Product Images are required');
     }
 
     return await (
@@ -47,5 +44,43 @@ export class ProductService {
 
   public async totalProductsNumber(): Promise<number> {
     return await ProductModel.countDocuments();
+  }
+
+  public async getSingleProduct(productId: string): Promise<Product> {
+    if (!Types.ObjectId.isValid(productId)) {
+      throw new AppError(400, 'Invalid product id');
+    }
+
+    const product = await ProductModel.findOne({ _id: productId });
+
+    if (product === null) {
+      throw new AppError(404, 'Product does not exist');
+    }
+
+    return product;
+  }
+
+  public async deleteProduct(productId: string, userId: string): Promise<Product> {
+    if (!Types.ObjectId.isValid(productId)) {
+      throw new AppError(400, 'Invalid product id');
+    }
+
+    const product = await ProductModel.findOne({ _id: productId });
+
+    if (product === null) {
+      throw new AppError(404, 'Product does not exist');
+    }
+
+    const store = await StoreModel.findOne({ _id: product.storeId });
+
+    if (store === null) {
+      throw new AppError(404, 'Product does not belong to store');
+    }
+
+    if (String(store.owner) !== String(userId)) {
+      throw new AppError(403, 'Store cannot delete product');
+    }
+
+    return await product.deleteOne();
   }
 }

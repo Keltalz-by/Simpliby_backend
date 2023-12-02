@@ -1,4 +1,5 @@
-import { modelOptions, prop, Severity, getModelForClass } from '@typegoose/typegoose';
+import { modelOptions, prop, Severity, getModelForClass, Ref } from '@typegoose/typegoose';
+import { Store } from '../store/store.model';
 
 @modelOptions({
   schemaOptions: {
@@ -10,6 +11,9 @@ import { modelOptions, prop, Severity, getModelForClass } from '@typegoose/typeg
   }
 })
 export class Category {
+  @prop({ ref: () => Store, required: true })
+  public storeId: Ref<Store>;
+
   @prop({ required: true, unique: true })
   public categoryName: string;
 }

@@ -2,7 +2,6 @@ import type * as mongoose from 'mongoose';
 import { type IGallery, type IGenericResponse } from '../../common';
 
 export interface ICreateStore {
-  owner: string;
   businessName: string;
   businessLocation: string;
   description: string;
@@ -14,7 +13,7 @@ export interface ICreateStore {
 }
 
 export interface IUpdateStore {
-  storeId: string;
+  userId: string;
   businessName: string;
   businessLocation: string;
   description: string;
