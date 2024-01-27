@@ -109,6 +109,16 @@ export class OrderService {
     return orders;
   }
 
+  public async getUserOrders(userId: string): Promise<Order[]> {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppError(400, 'Invalid user ID');
+    }
+
+    const orders = await OrderModel.find({ owner: userId });
+
+    return orders;
+  }
+
   public async updateOrderStatus(orderId: string, data: string) {
     if (!Types.ObjectId.isValid(orderId)) {
       throw new AppError(400, 'Invalid order ID');

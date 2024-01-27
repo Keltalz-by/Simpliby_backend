@@ -14,11 +14,12 @@ orderRoute.post(
   `${path}`,
   deserializeUser,
   requireUser,
-  restrictUser('user'),
+  restrictUser('buyer'),
   validateResource(createOrderSchema),
   order.createOrder
 );
 orderRoute.get(`${path}/:orderId/pay`, deserializeUser, requireUser, restrictUser('user'), payment.orderPayment);
+orderRoute.get(`${path}/history`, deserializeUser, requireUser, restrictUser('buyer'), order.userOrders);
 // orderRoute.get(`${path}`, order.getAllOrders);
 
 // export class OrderRoute implements Routes {

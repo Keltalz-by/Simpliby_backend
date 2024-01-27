@@ -36,6 +36,18 @@ export class OrderController {
     }
   };
 
+  public userOrders = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = res.locals.user._id;
+
+      const orders = await this.orderService.getUserOrders(userId);
+
+      res.status(200).json({ success: true, count: orders.length, data: orders });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
   public singleStoreOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = res.locals.user._id;
