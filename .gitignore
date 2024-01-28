@@ -1,5 +1,5 @@
 .vscode/
-.husky/
+# .husky/
 .eslintcache
 node_modules/
 dist/
