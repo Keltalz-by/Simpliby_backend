@@ -2,7 +2,7 @@
 # .husky/
 .eslintcache
 node_modules/
-# dist/
+dist/
 coverage/
 logs/
 .env.development.local
