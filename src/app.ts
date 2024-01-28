@@ -46,6 +46,7 @@ export class App {
   //   });
   // }
   // "start": "npm run build && cross-env NODE_ENV=production node dist/server.js",
+  // "build": "npm install",
 
   public runServer() {
     return this.app;
