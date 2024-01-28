@@ -29,14 +29,31 @@ export class App {
 
     this.app.disable('x-powered-by');
 
-    this.connectToDatabase();
+    // this.connectToDatabase();
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
     this.initializeErrorHandler();
   }
 
+  // public listen() {
+  //   const server = http.createServer(this.app);
+  //   server.listen(this.port, () => {
+  //     logger.info(`============================`);
+  //     logger.info(`===== ENV: ${this.env} =====`);
+  //     logger.info(`App listening on port ${this.port}`);
+  //     logger.info(`============================`);
+  //   });
+  // }
+
+  public runServer() {
+    return this.app;
+  }
+
   public listen() {
+    if (this.env !== 'production') {
+      set('debug', true);
+    }
     const server = http.createServer(this.app);
     server.listen(this.port, () => {
       logger.info(`============================`);
@@ -44,16 +61,6 @@ export class App {
       logger.info(`App listening on port ${this.port}`);
       logger.info(`============================`);
     });
-  }
-
-  public runServer() {
-    return this.app;
-  }
-
-  private connectToDatabase() {
-    if (this.env !== 'production') {
-      set('debug', true);
-    }
     void connectDB();
   }
 
