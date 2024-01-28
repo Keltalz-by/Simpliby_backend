@@ -54,6 +54,7 @@ export class App {
     if (this.env !== 'production') {
       set('debug', true);
     }
+    void connectDB();
     const server = http.createServer(this.app);
     server.listen(this.port, () => {
       logger.info(`============================`);
@@ -61,7 +62,6 @@ export class App {
       logger.info(`App listening on port ${this.port}`);
       logger.info(`============================`);
     });
-    void connectDB();
   }
 
   private initializeMiddlewares() {
