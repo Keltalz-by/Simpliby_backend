@@ -1,0 +1,1 @@
+{"version":3,"file":"toBuy.schema.js","sourceRoot":"","sources":["../../../src/api/toBuy/toBuy.schema.ts"],"names":[],"mappings":";;;AAAA,6BAA2D;AAE9C,QAAA,iBAAiB,GAAG,IAAA,YAAM,EAAC;IACtC,IAAI,EAAE,IAAA,YAAM,EAAC;QACX,KAAK,EAAE,IAAA,YAAM,EAAC;YACZ,cAAc,EAAE,mBAAmB;SACpC,CAAC;QACF,WAAW,EAAE,IAAA,aAAO,GAAE,CAAC,QAAQ,EAAE;KAClC,CAAC,CAAC,KAAK,EAAE;CACX,CAAC,CAAC"}
