@@ -58,6 +58,18 @@ export class User {
   @prop({ default: [] })
   followings: string[];
 
+  @prop({ default: null })
+  resetPasswordToken?: string;
+
+  @prop({ default: null })
+  resetPasswordTokenExpiresAt?: Date;
+
+  @prop({ default: null })
+  EmailVerificationToken?: string;
+
+  @prop({ default: null })
+  EmailVerificationTokenExpiresAt?: Date;
+
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {
     try {
       return await argon2.verify(this.password, candidatePassword);

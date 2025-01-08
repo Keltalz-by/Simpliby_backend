@@ -2,9 +2,6 @@ import { object, string, type TypeOf } from 'zod';
 
 export const verifySchema = object({
   body: object({
-    userId: string({
-      required_error: 'User ID is required'
-    }),
     otp: string({
       required_error: 'OTP is required'
     }).length(4, 'OTP should be four characters')

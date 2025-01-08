@@ -1,6 +1,6 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import _ from 'lodash';
-import { sendMail, requestPasswordTemplate, createToken, accessTokenCookieOptions } from '../../utils';
+import { createToken, accessTokenCookieOptions } from '../../utils';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { OTPService } from '../otp/otp.service';
@@ -61,11 +61,11 @@ export class AuthController {
 
   public verifyEmail = async (req: Request<{}, {}, OtpInput>, res: Response, next: NextFunction) => {
     try {
-      const { userId, otp } = req.body;
+      const { otp } = req.body;
 
-      await this.authService.verifyEmail(userId, otp);
+      await this.authService.verifyEmail(otp);
 
-      res.status(200).json({ success: true, message: 'User verified successfully.' });
+      res.status(200).json({ success: true, message: 'User verified successfully. Proceed to login' });
     } catch (error) {
       next(error);
     }
@@ -100,20 +100,34 @@ export class AuthController {
   public forgotPassword = async (req: Request<{}, {}, ForgotPasswordInput>, res: Response, next: NextFunction) => {
     try {
       const { email } = req.body;
-      const { user, newOtp } = await this.authService.forgotPassword(email);
+      await this.authService.forgotPassword(email);
 
-      const message = requestPasswordTemplate(user.name, newOtp);
-
-      await sendMail(email, 'Request for Password Reset', message);
       res.status(200).json({ success: true, message: 'Check your email for reset OTP' });
     } catch (error: any) {
       next(error);
     }
   };
 
-  public resetPassword = async (req: Request<{}, {}, ResetPasswordInput>, res: Response, next: NextFunction) => {
+  public verifyEmailForgotPassword = async (req: Request<{}, {}, OtpInput>, res: Response, next: NextFunction) => {
     try {
-      const { userId, password } = req.body;
+      const { otp } = req.body;
+
+      await this.authService.verifyEmailForForgotPassword(otp);
+
+      res.status(200).json({ success: true, message: 'Proceed to reset your password' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public resetPassword = async (
+    req: Request<ResetPasswordInput['params'], {}, ResetPasswordInput['body']>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { userId } = req.params;
+      const { password } = req.body;
 
       await this.authService.resetPassword(userId, password);
 

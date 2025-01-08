@@ -43,10 +43,12 @@ export const forgotPasswordSchema = object({
 });
 
 export const resetPasswordSchema = object({
-  body: object({
+  params: object({
     userId: string({
       required_error: 'User ID is required'
-    }),
+    })
+  }),
+  body: object({
     password: string({
       required_error: 'Password is required'
     }).min(6, 'Password length must be at least 6 characters'),
@@ -55,11 +57,11 @@ export const resetPasswordSchema = object({
     })
   }).refine((data) => data.password === data.passwordConfirm, {
     path: ['passwordConfirm'],
-    message: 'Passwords are not the same'
+    message: 'Passwords do not match'
   })
 });
 
 export type RegisterInput = TypeOf<typeof registerSchema>['body'];
 export type LoginInput = TypeOf<typeof loginSchema>['body'];
 export type ForgotPasswordInput = TypeOf<typeof forgotPasswordSchema>['body'];
-export type ResetPasswordInput = TypeOf<typeof resetPasswordSchema>['body'];
+export type ResetPasswordInput = TypeOf<typeof resetPasswordSchema>;
